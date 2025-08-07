@@ -1,10 +1,9 @@
 export interface DomainAllowlist {
   id: string;
   domain: string;
-  createdAt: string;
   updatedAt: string;
   createdBy?: {
-    id: string;
+export interface WorkspaceFilter {
     email: string;
     givenName: string;
     surname: string;
