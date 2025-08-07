@@ -195,7 +195,7 @@ const UserList: React.FC = () => {
   // Show workspace selection table
   if (showWorkspaceTable) {
     return (
-      <div className="space-y-6 h-full flex flex-col">
+      <div className="space-y-6 h-screen flex flex-col">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
@@ -220,7 +220,7 @@ const UserList: React.FC = () => {
         </div>
 
         {/* Workspaces Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col flex-1">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col flex-1 min-h-0">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Available Workspaces</h3>
             <p className="text-sm text-gray-600 mt-1">
@@ -229,11 +229,11 @@ const UserList: React.FC = () => {
           </div>
 
           {(workspacesLoading && workspaceState.workspaces.length === 0) ? (
-            <div className="flex items-center justify-center h-96">
+            <div className="flex items-center justify-center flex-1">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
             </div>
           ) : workspaceState.workspaces.length === 0 ? (
-            <div className="text-center py-12 h-96 flex flex-col items-center justify-center">
+            <div className="text-center py-12 flex-1 flex flex-col items-center justify-center">
               <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No workspaces found</h3>
               <p className="text-gray-600">
@@ -241,7 +241,7 @@ const UserList: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-hidden min-h-0">
               <div ref={scrollContainerRef} className="h-full overflow-y-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -313,7 +313,7 @@ const UserList: React.FC = () => {
 
   // Show user management for selected workspace
   return (
-    <div className="space-y-6 h-full flex flex-col">
+    <div className="space-y-6 h-screen flex flex-col">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button
@@ -373,7 +373,7 @@ const UserList: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col flex-1">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col flex-1 min-h-0">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Users</h3>
             <p className="text-sm text-gray-600 mt-1">
@@ -381,7 +381,7 @@ const UserList: React.FC = () => {
             </p>
           </div>
           
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden min-h-0">
             <div className="h-full overflow-y-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50 sticky top-0 z-10">
