@@ -54,3 +54,22 @@ export const GET_ME = gql`
     }
   }
 `;
+
+export const GET_WORKSPACES = gql`
+  query GetWorkspaces($filter: WorkspaceFilterInput, $first: Int, $after: String) {
+    workspaces(filter: $filter, first: $first, after: $after) {
+      edges {
+        node {
+          id
+          name
+          domain
+          createdAt
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;

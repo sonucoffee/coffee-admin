@@ -1,26 +1,36 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { Plus, Edit2, Trash2, User, Mail, Calendar, Shield } from 'lucide-react';
-import { GET_USERS } from '../../graphql/queries';
+import { Plus, Edit2, Trash2, User, Mail, Calendar, Shield, Building2 } from 'lucide-react';
+import { GET_USERS, GET_WORKSPACES } from '../../graphql/queries';
 import { DELETE_USER_ROLE } from '../../graphql/mutations';
-import { User as UserType } from '../../types/graphql';
+import { User as UserType, Workspace } from '../../types/graphql';
 import Button from '../UI/Button';
 import Modal from '../UI/Modal';
+import SearchableSelect from '../UI/SearchableSelect';
 import UserForm from './UserForm';
 
 const UserList: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserType | null>(null);
   const [deletingUser, setDeletingUser] = useState<UserType | null>(null);
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState('');
+  const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
 
-  // For demo purposes, using a mock workspace ID
-  const workspaceId = "1";
+  // Query workspaces for search
+  const { data: workspacesData, loading: workspacesLoading } = useQuery(GET_WORKSPACES, {
+    variables: {
+      filter: workspaceSearchQuery ? { search: workspaceSearchQuery } : {},
+      first: 20
+    },
+    skip: !workspaceSearchQuery
+  });
 
   const { data, loading, error, refetch } = useQuery(GET_USERS, {
     variables: {
-      filter: { workspaceId },
+      filter: { workspaceId: selectedWorkspaceId },
       first: 50
-    }
+    },
+    skip: !selectedWorkspaceId
   });
 
   const [deleteUser] = useMutation(DELETE_USER_ROLE);
@@ -33,7 +43,7 @@ const UserList: React.FC = () => {
         variables: {
           input: {
             userId: parseInt(deletingUser.id),
-            workspaceId: parseInt(workspaceId)
+            workspaceId: parseInt(selectedWorkspaceId)
           }
         }
       });
@@ -49,6 +59,14 @@ const UserList: React.FC = () => {
     setEditingUser(null);
     refetch();
   };
+
+  const workspaceOptions = (workspacesData?.workspaces?.edges || []).map((edge: any) => ({
+    value: edge.node.id,
+    label: edge.node.name,
+    subtitle: edge.node.domain
+  }));
+
+  const selectedWorkspace = workspaceOptions.find(w => w.value === selectedWorkspaceId);
 
   if (loading) {
     return (
@@ -90,20 +108,60 @@ const UserList: React.FC = () => {
             Invite, edit, and manage user roles and permissions
           </p>
         </div>
-        <Button
-          onClick={() => setIsCreateModalOpen(true)}
-          icon={Plus}
-        >
-          Invite User
-        </Button>
+        {selectedWorkspaceId && (
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            icon={Plus}
+          >
+            Invite User
+          </Button>
+        )}
       </div>
 
-      {users.length === 0 ? (
+      {/* Workspace Selection */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="flex items-center space-x-3 mb-4">
+          <Building2 className="w-5 h-5 text-gray-400" />
+          <h2 className="text-lg font-medium text-gray-900">Select Workspace</h2>
+        </div>
+        <SearchableSelect
+          label="Workspace"
+          value={selectedWorkspaceId}
+          onChange={setSelectedWorkspaceId}
+          onSearch={setWorkspaceSearchQuery}
+          options={workspaceOptions}
+          placeholder="Search and select a workspace"
+          searchPlaceholder="Type to search workspaces..."
+          loading={workspacesLoading}
+          required
+          className="max-w-md"
+        />
+        {selectedWorkspace && (
+          <div className="mt-3 p-3 bg-gray-50 rounded-md">
+            <p className="text-sm text-gray-600">
+              Selected workspace: <span className="font-medium text-gray-900">{selectedWorkspace.label}</span>
+              {selectedWorkspace.subtitle && (
+                <span className="text-gray-500"> ({selectedWorkspace.subtitle})</span>
+              )}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {!selectedWorkspaceId ? (
+        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+          <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Select a workspace</h3>
+          <p className="text-gray-600">
+            Please select a workspace above to view and manage its users
+          </p>
+        </div>
+      ) : users.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
           <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
           <p className="text-gray-600 mb-6">
-            Start by inviting your first user to the workspace
+            Start by inviting your first user to this workspace
           </p>
           <Button
             onClick={() => setIsCreateModalOpen(true)}
@@ -212,7 +270,7 @@ const UserList: React.FC = () => {
         title="Invite New User"
       >
         <UserForm
-          workspaceId={workspaceId}
+          workspaceId={selectedWorkspaceId}
           onSuccess={handleFormSuccess}
           onCancel={() => setIsCreateModalOpen(false)}
         />
@@ -227,7 +285,7 @@ const UserList: React.FC = () => {
         {editingUser && (
           <UserForm
             user={editingUser}
-            workspaceId={workspaceId}
+            workspaceId={selectedWorkspaceId}
             onSuccess={handleFormSuccess}
             onCancel={() => setEditingUser(null)}
           />
