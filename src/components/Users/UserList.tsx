@@ -245,17 +245,19 @@ const UserList: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <Building2 className="w-5 h-5 text-gray-400 mr-3" />
-                            <div className="flex-1">
+                            <div>
                               <div className="text-sm font-medium text-gray-900">
                                 {workspace.name}
                               </div>
                             </div>
-                            <ChevronRight className="w-5 h-5 text-gray-400 ml-3" />
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500">
-                            {workspace.domain || 'No domain'}
+                          <div className="flex items-center justify-between">
+                            <div className="text-sm text-gray-500">
+                              {workspace.domain || 'No domain'}
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-gray-400 ml-3" />
                           </div>
                         </td>
                       </tr>
