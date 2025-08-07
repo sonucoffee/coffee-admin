@@ -195,7 +195,7 @@ const UserList: React.FC = () => {
   // Show workspace selection table
   if (showWorkspaceTable) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 h-full flex flex-col">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
@@ -220,7 +220,7 @@ const UserList: React.FC = () => {
         </div>
 
         {/* Workspaces Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col flex-1">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Available Workspaces</h3>
             <p className="text-sm text-gray-600 mt-1">
@@ -242,7 +242,7 @@ const UserList: React.FC = () => {
             </div>
           ) : (
             <div className="flex-1 overflow-hidden">
-              <div ref={scrollContainerRef} className="h-96 overflow-y-auto">
+              <div ref={scrollContainerRef} className="h-full overflow-y-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -313,7 +313,7 @@ const UserList: React.FC = () => {
 
   // Show user management for selected workspace
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 h-full flex flex-col">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button
@@ -373,7 +373,7 @@ const UserList: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col flex-1">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Users</h3>
             <p className="text-sm text-gray-600 mt-1">
@@ -382,7 +382,7 @@ const UserList: React.FC = () => {
           </div>
           
           <div className="flex-1 overflow-hidden">
-            <div className="h-96 overflow-y-auto">
+            <div className="h-full overflow-y-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
