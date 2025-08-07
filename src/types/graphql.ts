@@ -18,8 +18,8 @@ export interface User {
   surname: string;
   profileImageUrl?: string;
   isOnboarded: boolean;
-  role: string;
-  inviteStatus: string;
+  role?: string;
+  inviteStatus?: string;
   lastLoginTs?: string;
 }
 

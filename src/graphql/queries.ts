@@ -18,7 +18,7 @@ export const GET_DOMAIN_ALLOWLISTS = gql`
 `;
 
 export const GET_USERS = gql`
-  query GetUsers($filter: UserFilterInput!, $first: Int, $after: String) {
+  query GetUsers($filter: UserFilterInput!, $workspaceId: ID!, $first: Int, $after: String) {
     users(filter: $filter, first: $first, after: $after) {
       edges {
         node {
@@ -28,6 +28,9 @@ export const GET_USERS = gql`
           surname
           profileImageUrl
           isOnboarded
+          role(workspaceId: $workspaceId)
+          inviteStatus(workspaceId: $workspaceId)
+          lastLoginTs(workspaceId: $workspaceId)
         }
       }
       pageInfo {

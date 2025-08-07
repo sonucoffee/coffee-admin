@@ -28,6 +28,7 @@ const UserList: React.FC = () => {
   const { data, loading, error, refetch } = useQuery(GET_USERS, {
     variables: {
       filter: { workspaceId: selectedWorkspaceId },
+      workspaceId: selectedWorkspaceId,
       first: 50
     },
     skip: !selectedWorkspaceId
