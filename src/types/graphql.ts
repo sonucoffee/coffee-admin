@@ -1,9 +1,10 @@
 export interface DomainAllowlist {
   id: string;
   domain: string;
+  createdAt: string;
   updatedAt: string;
   createdBy?: {
-export interface WorkspaceFilter {
+    id: string;
     email: string;
     givenName: string;
     surname: string;
@@ -59,3 +60,9 @@ export interface DeleteUserRoleInput {
   userId: number;
   workspaceId: number;
 }
+
+export interface WorkspaceFilter {
+    email: string;
+    givenName: string;
+    surname: string;
+};

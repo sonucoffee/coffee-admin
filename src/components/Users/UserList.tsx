@@ -1,9 +1,9 @@
+import { useMutation, useQuery } from '@apollo/client';
+import { Building2, Edit2, Mail, Plus, Shield, Trash2, User } from 'lucide-react';
 import React, { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
-import { Plus, Edit2, Trash2, User, Mail, Calendar, Shield, Building2 } from 'lucide-react';
-import { GET_USERS, GET_WORKSPACES } from '../../graphql/queries';
 import { DELETE_USER_ROLE } from '../../graphql/mutations';
-import { User as UserType, Workspace } from '../../types/graphql';
+import { GET_USERS, GET_WORKSPACES } from '../../graphql/queries';
+import { User as UserType } from '../../types/graphql';
 import Button from '../UI/Button';
 import Modal from '../UI/Modal';
 import SearchableSelect from '../UI/SearchableSelect';
@@ -66,7 +66,7 @@ const UserList: React.FC = () => {
     subtitle: edge.node.domain
   }));
 
-  const selectedWorkspace = workspaceOptions.find(w => w.value === selectedWorkspaceId);
+  const selectedWorkspace = workspaceOptions.find((w: any) => w.value === selectedWorkspaceId);
 
   if (loading) {
     return (
