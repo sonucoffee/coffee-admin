@@ -14,6 +14,7 @@ const UserList: React.FC = () => {
   const [editingUser, setEditingUser] = useState<UserType | null>(null);
   const [deletingUser, setDeletingUser] = useState<UserType | null>(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState('');
+  const [selectedWorkspaceInfo, setSelectedWorkspaceInfo] = useState<{value: string, label: string, subtitle?: string} | null>(null);
   const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
 
   // Query workspaces for search
@@ -67,7 +68,24 @@ const UserList: React.FC = () => {
     subtitle: edge.node.domain
   }));
 
-  const selectedWorkspace = workspaceOptions.find((w: any) => w.value === selectedWorkspaceId);
+  // Update selected workspace info when workspace is selected
+  React.useEffect(() => {
+    if (selectedWorkspaceId && workspaceOptions.length > 0) {
+      const workspace = workspaceOptions.find((w: any) => w.value === selectedWorkspaceId);
+      if (workspace) {
+        setSelectedWorkspaceInfo(workspace);
+      }
+    }
+  }, [selectedWorkspaceId, workspaceOptions]);
+
+  const handleWorkspaceChange = (workspaceId: string) => {
+    setSelectedWorkspaceId(workspaceId);
+    // Find and store the workspace info immediately when selected
+    const workspace = workspaceOptions.find((w: any) => w.value === workspaceId);
+    if (workspace) {
+      setSelectedWorkspaceInfo(workspace);
+    }
+  };
 
   if (loading) {
     return (
@@ -128,7 +146,7 @@ const UserList: React.FC = () => {
         <SearchableSelect
           label="Workspace"
           value={selectedWorkspaceId}
-          onChange={setSelectedWorkspaceId}
+          onChange={handleWorkspaceChange}
           onSearch={setWorkspaceSearchQuery}
           options={workspaceOptions}
           placeholder="Search and select a workspace"
@@ -137,12 +155,12 @@ const UserList: React.FC = () => {
           required
           className="max-w-md"
         />
-        {selectedWorkspace && (
+        {selectedWorkspaceInfo && (
           <div className="mt-3 p-3 bg-gray-50 rounded-md">
             <p className="text-sm text-gray-600">
-              Selected workspace: <span className="font-medium text-gray-900">{selectedWorkspace.label}</span>
-              {selectedWorkspace.subtitle && (
-                <span className="text-gray-500"> ({selectedWorkspace.subtitle})</span>
+              Selected workspace: <span className="font-medium text-gray-900">{selectedWorkspaceInfo.label}</span>
+              {selectedWorkspaceInfo.subtitle && (
+                <span className="text-gray-500"> ({selectedWorkspaceInfo.subtitle})</span>
               )}
             </p>
           </div>
@@ -265,7 +283,7 @@ const UserList: React.FC = () => {
       )}
 
       {/* Selected Workspace Information */}
-      {selectedWorkspace && (
+      {selectedWorkspaceInfo && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <div className="flex items-start space-x-4">
             <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg">
@@ -278,12 +296,12 @@ const UserList: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <span className="text-sm font-medium text-blue-700">Name:</span>
-                  <span className="text-sm text-blue-800">{selectedWorkspace.label}</span>
+                  <span className="text-sm text-blue-800">{selectedWorkspaceInfo.label}</span>
                 </div>
-                {selectedWorkspace.subtitle && (
+                {selectedWorkspaceInfo.subtitle && (
                   <div className="flex items-center space-x-2">
                     <span className="text-sm font-medium text-blue-700">Domain:</span>
-                    <span className="text-sm text-blue-800">{selectedWorkspace.subtitle}</span>
+                    <span className="text-sm text-blue-800">{selectedWorkspaceInfo.subtitle}</span>
                   </div>
                 )}
                 <div className="flex items-center space-x-2">
