@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client';
-import { Building2, Edit2, Mail, Plus, Shield, Trash2, User } from 'lucide-react';
+import { Building2, Edit2, Mail, Plus, Shield, Trash2, User, Users } from 'lucide-react';
 import React, { useState } from 'react';
 import { DELETE_USER_ROLE } from '../../graphql/mutations';
 import { GET_USERS, GET_WORKSPACES } from '../../graphql/queries';
@@ -14,6 +14,7 @@ const UserList: React.FC = () => {
   const [editingUser, setEditingUser] = useState<UserType | null>(null);
   const [deletingUser, setDeletingUser] = useState<UserType | null>(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState('');
+  const [selectedWorkspaceInfo, setSelectedWorkspaceInfo] = useState<{value: string, label: string, subtitle?: string} | null>(null);
   const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
 
   // Query workspaces for search
@@ -67,7 +68,14 @@ const UserList: React.FC = () => {
     subtitle: edge.node.domain
   }));
 
-  const selectedWorkspace = workspaceOptions.find((w: any) => w.value === selectedWorkspaceId);
+  const handleWorkspaceChange = (workspaceId: string) => {
+    setSelectedWorkspaceId(workspaceId);
+    // Find and store the workspace info immediately when selected
+    const workspace = workspaceOptions.find((w: any) => w.value === workspaceId);
+    if (workspace) {
+      setSelectedWorkspaceInfo(workspace);
+    }
+  };
 
   if (loading) {
     return (
@@ -121,32 +129,60 @@ const UserList: React.FC = () => {
 
       {/* Workspace Selection */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <Building2 className="w-5 h-5 text-gray-400" />
-          <h2 className="text-lg font-medium text-gray-900">Select Workspace</h2>
-        </div>
-        <SearchableSelect
-          label="Workspace"
-          value={selectedWorkspaceId}
-          onChange={setSelectedWorkspaceId}
-          onSearch={setWorkspaceSearchQuery}
-          options={workspaceOptions}
-          placeholder="Search and select a workspace"
-          searchPlaceholder="Type to search workspaces..."
-          loading={workspacesLoading}
-          required
-          className="max-w-md"
-        />
-        {selectedWorkspace && (
-          <div className="mt-3 p-3 bg-gray-50 rounded-md">
-            <p className="text-sm text-gray-600">
-              Selected workspace: <span className="font-medium text-gray-900">{selectedWorkspace.label}</span>
-              {selectedWorkspace.subtitle && (
-                <span className="text-gray-500"> ({selectedWorkspace.subtitle})</span>
-              )}
-            </p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Workspace Search */}
+          <div>
+            <div className="flex items-center space-x-3 mb-4">
+              <Building2 className="w-5 h-5 text-gray-400" />
+              <h2 className="text-lg font-medium text-gray-900">Select Workspace</h2>
+            </div>
+            <SearchableSelect
+              label="Workspace"
+              value={selectedWorkspaceId}
+              onChange={handleWorkspaceChange}
+              onSearch={setWorkspaceSearchQuery}
+              options={workspaceOptions}
+              placeholder="Search and select a workspace"
+              searchPlaceholder="Type to search workspaces..."
+              loading={workspacesLoading}
+              required
+            />
           </div>
-        )}
+
+          {/* Selected Workspace Info */}
+          {selectedWorkspaceInfo && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start space-x-3">
+                {/* <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg flex-shrink-0">
+                  <Building2 className="w-5 h-5 text-blue-600" />
+                </div> */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-blue-900 mb-2">
+                    Workspace Info
+                  </h3>
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs font-medium text-blue-700">Name:</span>
+                      <span className="text-xs text-blue-800 truncate">{selectedWorkspaceInfo.label}</span>
+                    </div>
+                    {selectedWorkspaceInfo.subtitle && (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs font-medium text-blue-700">Domain:</span>
+                        <span className="text-xs text-blue-800 truncate">{selectedWorkspaceInfo.subtitle}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center space-x-2 pt-1">
+                      <Users className="w-3 h-3 text-blue-600" />
+                      <span className="text-xs text-blue-700">
+                        {users.length} user{users.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {!selectedWorkspaceId ? (
