@@ -1,12 +1,11 @@
 import { useMutation, useQuery } from '@apollo/client';
 import { Building2, Edit2, Mail, Plus, Shield, Trash2, User, Users, ChevronRight } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DELETE_USER_ROLE } from '../../graphql/mutations';
 import { GET_USERS, GET_WORKSPACES } from '../../graphql/queries';
 import { User as UserType } from '../../types/graphql';
 import Button from '../UI/Button';
 import Modal from '../UI/Modal';
-import Select from '../UI/Select';
 import Input from '../UI/Input';
 import UserForm from './UserForm';
 
@@ -307,10 +306,7 @@ const UserList: React.FC = () => {
             ← Back to Workspaces
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-            <p className="text-gray-600 mt-1">
-              Managing users for <span className="font-medium">{selectedWorkspaceName}</span>
-            </p>
+            <h1 className="text-2xl font-bold text-gray-900">{selectedWorkspaceName}</h1>
           </div>
         </div>
         <Button
