@@ -18,12 +18,13 @@ const UserList: React.FC = () => {
   const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
 
   // Query workspaces for search
-  const { data: workspacesData, loading: workspacesLoading } = useQuery(GET_WORKSPACES, {
+  const { data: workspacesData, loading: workspacesLoading, refetch: refetchWorkspaces } = useQuery(GET_WORKSPACES, {
     variables: {
-      filter: workspaceSearchQuery ? { search: workspaceSearchQuery } : undefined,
+      filter: workspaceSearchQuery.trim() ? { search: workspaceSearchQuery.trim() } : {},
       first: 20
     },
-    // Remove skip condition to allow fetching workspaces without search
+    fetchPolicy: 'cache-and-network',
+    notifyOnNetworkStatusChange: true
   });
 
   const { data, loading, error, refetch } = useQuery(GET_USERS, {
