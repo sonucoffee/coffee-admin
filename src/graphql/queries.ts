@@ -49,6 +49,7 @@ export const GET_ME = gql`
       givenName
       surname
       profileImageUrl
+      isSuperuser
       workspaces {
         id
         name

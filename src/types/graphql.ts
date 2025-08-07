@@ -21,6 +21,7 @@ export interface User {
   role?: string;
   inviteStatus?: string;
   lastLoginTs?: string;
+  isSuperuser?: boolean;
 }
 
 export interface CreateDomainAllowlistInput {

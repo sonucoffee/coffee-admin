@@ -1,15 +1,63 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Auth0Provider, useAuth0, withAuthenticationRequired } from '@auth0/auth0-react';
-import { ApolloProvider } from '@apollo/client';
+import { ApolloProvider, useQuery } from '@apollo/client';
 import { auth0Config } from './config/auth0';
 import { apolloClient } from './config/apollo';
+import { GET_ME } from './graphql/queries';
 import Layout from './components/Layout/Layout';
 import LoginPage from './components/Auth/LoginPage';
+import UnauthorizedPage from './components/Auth/UnauthorizedPage';
 import DomainList from './components/Domains/DomainList';
 import UserList from './components/Users/UserList';
 import CreateWorkspace from './components/Workspaces/CreateWorkspace';
 import LoadingSpinner from './components/UI/LoadingSpinner';
+
+const AuthorizedApp: React.FC = () => {
+  const { data, loading, error } = useQuery(GET_ME);
+
+  if (loading) {
+    return <LoadingSpinner message="Checking permissions..." />;
+  }
+
+  if (error) {
+    console.error('Error fetching user data:', error);
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Unable to verify permissions</h2>
+            <p className="text-gray-600 mb-4">There was an issue checking your account permissions.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Check if user is superuser
+  if (!data?.me?.isSuperuser) {
+    return <UnauthorizedPage />;
+  }
+
+  // User is authorized, show the main app
+  return (
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Navigate to="/domains" replace />} />
+        <Route path="/create-workspace" element={<CreateWorkspace />} />
+        <Route path="/domains" element={<DomainList />} />
+        <Route path="/users" element={<UserList />} />
+        <Route path="*" element={<Navigate to="/domains" replace />} />
+      </Routes>
+    </Layout>
+  );
+};
 
 const AppContent: React.FC = () => {
   const { isLoading, isAuthenticated, getAccessTokenSilently, error } = useAuth0();
@@ -68,17 +116,8 @@ const AppContent: React.FC = () => {
     );
   }
 
-  return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<Navigate to="/domains" replace />} />
-        <Route path="/create-workspace" element={<CreateWorkspace />} />
-        <Route path="/domains" element={<DomainList />} />
-        <Route path="/users" element={<UserList />} />
-        <Route path="*" element={<Navigate to="/domains" replace />} />
-      </Routes>
-    </Layout>
-  );
+  // User is authenticated, now check if they're authorized
+  return <AuthorizedApp />;
 };
 
 const App: React.FC = () => {
