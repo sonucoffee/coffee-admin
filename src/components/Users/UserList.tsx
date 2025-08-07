@@ -68,16 +68,6 @@ const UserList: React.FC = () => {
     subtitle: edge.node.domain
   }));
 
-  // Update selected workspace info when workspace is selected
-  React.useEffect(() => {
-    if (selectedWorkspaceId && workspaceOptions.length > 0) {
-      const workspace = workspaceOptions.find((w: any) => w.value === selectedWorkspaceId);
-      if (workspace) {
-        setSelectedWorkspaceInfo(workspace);
-      }
-    }
-  }, [selectedWorkspaceId, workspaceOptions]);
-
   const handleWorkspaceChange = (workspaceId: string) => {
     setSelectedWorkspaceId(workspaceId);
     // Find and store the workspace info immediately when selected
