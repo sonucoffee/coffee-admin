@@ -177,7 +177,7 @@ const UserList: React.FC = () => {
         </div>
 
         {/* Workspaces Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Available Workspaces</h3>
             <p className="text-sm text-gray-600 mt-1">
@@ -186,11 +186,11 @@ const UserList: React.FC = () => {
           </div>
 
           {workspacesLoading && workspaceState.workspaces.length === 0 ? (
-            <div className="flex items-center justify-center h-32">
+            <div className="flex items-center justify-center h-96">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
             </div>
           ) : workspaceState.workspaces.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12 h-96 flex flex-col items-center justify-center">
               <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No workspaces found</h3>
               <p className="text-gray-600">
@@ -198,7 +198,8 @@ const UserList: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="flex-1 overflow-hidden">
+              <div className="h-96 overflow-y-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -246,6 +247,7 @@ const UserList: React.FC = () => {
                   })}
                 </tbody>
               </table>
+              </div>
 
               {/* Load More Section */}
               {(workspaceState.hasNextPage || workspaceState.isLoadingMore) && (
