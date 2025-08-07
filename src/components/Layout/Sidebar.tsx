@@ -1,9 +1,15 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Shield, Users, Globe } from 'lucide-react';
+import { Shield, Users, Globe, Building2 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
   const navItems = [
+    {
+      to: '/create-workspace',
+      icon: Building2,
+      label: 'Create Workspace',
+      description: 'Set up new workspace'
+    },
     {
       to: '/domains',
       icon: Globe,

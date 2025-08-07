@@ -75,3 +75,23 @@ export const GET_WORKSPACES = gql`
     }
   }
 `;
+
+export const SEARCH_USERS = gql`
+  query SearchUsers($filter: UserFilterInput!, $first: Int, $after: String) {
+    users(filter: $filter, first: $first, after: $after) {
+      edges {
+        node {
+          id
+          email
+          givenName
+          surname
+          profileImageUrl
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;

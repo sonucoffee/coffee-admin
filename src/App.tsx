@@ -8,6 +8,7 @@ import Layout from './components/Layout/Layout';
 import LoginPage from './components/Auth/LoginPage';
 import DomainList from './components/Domains/DomainList';
 import UserList from './components/Users/UserList';
+import CreateWorkspace from './components/Workspaces/CreateWorkspace';
 import LoadingSpinner from './components/UI/LoadingSpinner';
 
 const AppContent: React.FC = () => {
@@ -48,6 +49,7 @@ const AppContent: React.FC = () => {
     <Layout>
       <Routes>
         <Route path="/" element={<Navigate to="/domains" replace />} />
+        <Route path="/create-workspace" element={<CreateWorkspace />} />
         <Route path="/domains" element={<DomainList />} />
         <Route path="/users" element={<UserList />} />
         <Route path="*" element={<Navigate to="/domains" replace />} />

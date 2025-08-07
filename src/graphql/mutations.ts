@@ -84,3 +84,17 @@ export const DELETE_USER_ROLE = gql`
     }
   }
 `;
+
+export const CREATE_WORKSPACE = gql`
+  mutation CreateWorkspace($input: CreateWorkspaceInput!) {
+    createWorkspace(input: $input) {
+      success
+      workspace {
+        id
+        name
+        domain
+      }
+      error
+    }
+  }
+`;

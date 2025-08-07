@@ -62,7 +62,31 @@ export interface DeleteUserRoleInput {
 }
 
 export interface WorkspaceFilter {
-    email: string;
-    givenName: string;
-    surname: string;
+  search?: string;
+}
+
+export interface CreateWorkspaceInput {
+  name: string;
+  domain?: string;
+  logoUrl?: string;
+  owners?: CreateWorkspaceUserInput[];
+  users?: CreateWorkspaceUserInput[];
+}
+
+export interface CreateWorkspaceUserInput {
+  id: number;
+}
+
+export interface CreateWorkspace {
+  success: boolean;
+  workspace?: {
+    id: string;
+    name: string;
+    domain?: string;
+  };
+  error?: string;
+}
+
+export interface UserSearchFilter {
+  search?: string;
 };
