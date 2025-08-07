@@ -16,15 +16,34 @@ const UserList: React.FC = () => {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState('');
   const [selectedWorkspaceInfo, setSelectedWorkspaceInfo] = useState<{value: string, label: string, subtitle?: string} | null>(null);
   const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
+  const [allWorkspaces, setAllWorkspaces] = useState<any[]>([]);
+  const [workspaceCursor, setWorkspaceCursor] = useState<string | null>(null);
+  const [hasNextPage, setHasNextPage] = useState(false);
 
   // Query workspaces for search
   const { data: workspacesData, loading: workspacesLoading, refetch: refetchWorkspaces } = useQuery(GET_WORKSPACES, {
     variables: {
       filter: workspaceSearchQuery.trim() ? { search: workspaceSearchQuery.trim() } : {},
-      first: 20
+      first: 50,
+      after: workspaceCursor
     },
     fetchPolicy: 'cache-and-network',
-    notifyOnNetworkStatusChange: true
+    notifyOnNetworkStatusChange: true,
+    onCompleted: (data) => {
+      const edges = data?.workspaces?.edges || [];
+      const pageInfo = data?.workspaces?.pageInfo;
+      
+      if (workspaceCursor) {
+        // Append to existing workspaces (lazy loading)
+        setAllWorkspaces(prev => [...prev, ...edges]);
+      } else {
+        // Replace workspaces (new search or initial load)
+        setAllWorkspaces(edges);
+      }
+      
+      setHasNextPage(pageInfo?.hasNextPage || false);
+      setWorkspaceCursor(pageInfo?.endCursor || null);
+    }
   });
 
   const { data, loading, error, refetch } = useQuery(GET_USERS, {
@@ -37,6 +56,23 @@ const UserList: React.FC = () => {
   });
 
   const [deleteUser] = useMutation(DELETE_USER_ROLE);
+
+  // Handle workspace search with debouncing
+  const handleWorkspaceSearch = (query: string) => {
+    setWorkspaceSearchQuery(query);
+    setWorkspaceCursor(null); // Reset cursor for new search
+  };
+
+  // Handle loading more workspaces
+  const handleLoadMoreWorkspaces = () => {
+    if (hasNextPage && !workspacesLoading && workspaceCursor) {
+      refetchWorkspaces({
+        filter: workspaceSearchQuery.trim() ? { search: workspaceSearchQuery.trim() } : {},
+        first: 50,
+        after: workspaceCursor
+      });
+    }
+  };
 
   const handleDelete = async () => {
     if (!deletingUser) return;
@@ -63,7 +99,7 @@ const UserList: React.FC = () => {
     refetch();
   };
 
-  const workspaceOptions = (workspacesData?.workspaces?.edges || []).map((edge: any) => ({
+  const workspaceOptions = allWorkspaces.map((edge: any) => ({
     value: edge.node.id,
     label: edge.node.name,
     subtitle: edge.node.domain
@@ -141,11 +177,13 @@ const UserList: React.FC = () => {
               label="Workspace"
               value={selectedWorkspaceId}
               onChange={handleWorkspaceChange}
-              onSearch={setWorkspaceSearchQuery}
+              onSearch={handleWorkspaceSearch}
+              onLoadMore={handleLoadMoreWorkspaces}
               options={workspaceOptions}
               placeholder="Search and select a workspace"
               searchPlaceholder="Type to search workspaces..."
               loading={workspacesLoading}
+              hasNextPage={hasNextPage}
               required
             />
           </div>

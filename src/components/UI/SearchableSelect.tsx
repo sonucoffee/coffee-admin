@@ -12,12 +12,14 @@ interface SearchableSelectProps {
   value: string;
   onChange: (value: string) => void;
   onSearch: (query: string) => void;
+  onLoadMore?: () => void;
   options: Option[];
   placeholder?: string;
   required?: boolean;
   error?: string;
   disabled?: boolean;
   loading?: boolean;
+  hasNextPage?: boolean;
   className?: string;
   searchPlaceholder?: string;
 }
@@ -27,12 +29,14 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   value,
   onChange,
   onSearch,
+  onLoadMore,
   options,
   placeholder = "Select an option",
   required = false,
   error,
   disabled = false,
   loading = false,
+  hasNextPage = false,
   className = '',
   searchPlaceholder = "Search..."
 }) => {
@@ -40,6 +44,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find(option => option.value === value);
 
@@ -69,6 +74,21 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
     return () => clearTimeout(timeoutId);
   }, [searchQuery, onSearch]);
 
+  // Infinite scroll handler
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer || !onLoadMore || !hasNextPage) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      if (scrollTop + clientHeight >= scrollHeight - 10) {
+        onLoadMore();
+      }
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll);
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, [onLoadMore, hasNextPage]);
   const handleSelect = (optionValue: string) => {
     onChange(optionValue);
     setIsOpen(false);
@@ -149,7 +169,10 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
               </div>
             </div>
             
-            <div className="max-h-60 overflow-y-auto">
+            <div 
+              ref={scrollContainerRef}
+              className="max-h-60 overflow-y-auto"
+            >
               {loading ? (
                 <div className="p-3 text-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mx-auto"></div>
@@ -160,25 +183,34 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                   {searchQuery ? 'No workspaces found' : 'Start typing to search workspaces'}
                 </div>
               ) : (
-                options.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => handleSelect(option.value)}
-                    className={`w-full px-3 py-2 text-left hover:bg-gray-100 focus:outline-none focus:bg-gray-100 ${
-                      option.value === value ? 'bg-gray-50' : ''
-                    }`}
-                  >
-                    <div className="text-sm font-medium text-gray-900">
-                      {option.label}
-                    </div>
-                    {option.subtitle && (
-                      <div className="text-xs text-gray-500">
-                        {option.subtitle}
+                <>
+                  {options.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => handleSelect(option.value)}
+                      className={`w-full px-3 py-2 text-left hover:bg-gray-100 focus:outline-none focus:bg-gray-100 ${
+                        option.value === value ? 'bg-gray-50' : ''
+                      }`}
+                    >
+                      <div className="text-sm font-medium text-gray-900">
+                        {option.label}
                       </div>
-                    )}
-                  </button>
-                ))
+                      {option.subtitle && (
+                        <div className="text-xs text-gray-500">
+                          {option.subtitle}
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                  
+                  {hasNextPage && (
+                    <div className="p-3 text-center border-t border-gray-200">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mx-auto"></div>
+                      <p className="text-xs text-gray-500 mt-1">Loading more...</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
