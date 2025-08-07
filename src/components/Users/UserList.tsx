@@ -1,12 +1,13 @@
 import { useMutation, useQuery } from '@apollo/client';
-import { Building2, Edit2, Mail, Plus, Shield, Trash2, User, Users } from 'lucide-react';
+import { Building2, Edit2, Mail, Plus, Shield, Trash2, User, Users, ChevronRight } from 'lucide-react';
 import React, { useState } from 'react';
 import { DELETE_USER_ROLE } from '../../graphql/mutations';
 import { GET_USERS, GET_WORKSPACES } from '../../graphql/queries';
 import { User as UserType } from '../../types/graphql';
 import Button from '../UI/Button';
 import Modal from '../UI/Modal';
-import SearchableSelect from '../UI/SearchableSelect';
+import Select from '../UI/Select';
+import Input from '../UI/Input';
 import UserForm from './UserForm';
 
 const UserList: React.FC = () => {
@@ -14,8 +15,11 @@ const UserList: React.FC = () => {
   const [editingUser, setEditingUser] = useState<UserType | null>(null);
   const [deletingUser, setDeletingUser] = useState<UserType | null>(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState('');
-  const [selectedWorkspaceInfo, setSelectedWorkspaceInfo] = useState<{value: string, label: string, subtitle?: string} | null>(null);
+  const [selectedWorkspaceName, setSelectedWorkspaceName] = useState('');
   const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
+  const [showWorkspaceTable, setShowWorkspaceTable] = useState(true);
+
+  // Workspace pagination state
   const [workspaceState, setWorkspaceState] = useState({
     workspaces: [] as any[],
     hasNextPage: false,
@@ -23,15 +27,14 @@ const UserList: React.FC = () => {
     isLoadingMore: false
   });
 
-  // Query workspaces for search
-  const { loading: workspacesLoading, fetchMore } = useQuery(GET_WORKSPACES, {
+  // Query workspaces with pagination
+  const { loading: workspacesLoading, fetchMore: fetchMoreWorkspaces } = useQuery(GET_WORKSPACES, {
     variables: {
       filter: workspaceSearchQuery.trim() ? { search: workspaceSearchQuery.trim() } : {},
       first: 50,
       after: null
     },
     fetchPolicy: 'cache-and-network',
-    notifyOnNetworkStatusChange: true,
     onCompleted: (data) => {
       const edges = data?.workspaces?.edges || [];
       const pageInfo = data?.workspaces?.pageInfo;
@@ -45,6 +48,7 @@ const UserList: React.FC = () => {
     }
   });
 
+  // Query users for selected workspace
   const { data, loading, error, refetch } = useQuery(GET_USERS, {
     variables: {
       filter: { workspaceId: selectedWorkspaceId },
@@ -56,26 +60,25 @@ const UserList: React.FC = () => {
 
   const [deleteUser] = useMutation(DELETE_USER_ROLE);
 
-  // Handle loading more workspaces
-  const handleLoadMoreWorkspaces = React.useCallback(() => {
-    console.log('handleLoadMoreWorkspaces called', {
-      hasNextPage: workspaceState.hasNextPage,
-      isLoadingMore: workspaceState.isLoadingMore,
-      endCursor: workspaceState.endCursor,
-      workspacesLoading
-    });
-    
+  // Handle workspace search
+  const handleWorkspaceSearch = (query: string) => {
+    setWorkspaceSearchQuery(query);
+  };
+
+  // Handle load more workspaces
+  const handleLoadMoreWorkspaces = async () => {
     if (workspaceState.hasNextPage && !workspacesLoading && !workspaceState.isLoadingMore && workspaceState.endCursor) {
       setWorkspaceState(prev => ({ ...prev, isLoadingMore: true }));
       
-      fetchMore({
-        variables: {
-          filter: workspaceSearchQuery.trim() ? { search: workspaceSearchQuery.trim() } : {},
-          first: 50,
-          after: workspaceState.endCursor
-        },
-      }).then((result) => {
-        console.log('fetchMore result:', result);
+      try {
+        const result = await fetchMoreWorkspaces({
+          variables: {
+            filter: workspaceSearchQuery.trim() ? { search: workspaceSearchQuery.trim() } : {},
+            first: 50,
+            after: workspaceState.endCursor
+          }
+        });
+
         const newEdges = result.data?.workspaces?.edges || [];
         const pageInfo = result.data?.workspaces?.pageInfo;
         
@@ -85,25 +88,26 @@ const UserList: React.FC = () => {
           endCursor: pageInfo?.endCursor || null,
           isLoadingMore: false
         }));
-      }).catch((error) => {
+      } catch (error) {
         console.error('Error loading more workspaces:', error);
         setWorkspaceState(prev => ({ ...prev, isLoadingMore: false }));
-      });
-    } else {
-      console.log('Load more conditions not met');
+      }
     }
-  }, [workspaceState.hasNextPage, workspacesLoading, workspaceState.isLoadingMore, workspaceState.endCursor, fetchMore, workspaceSearchQuery]);
+  };
 
-  // Handle workspace search with debouncing
-  const handleWorkspaceSearch = React.useCallback((query: string) => {
-    setWorkspaceSearchQuery(query);
-    setWorkspaceState({
-      workspaces: [],
-      hasNextPage: false,
-      endCursor: null,
-      isLoadingMore: false
-    });
-  }, []);
+  // Handle workspace selection
+  const handleWorkspaceSelect = (workspace: any) => {
+    setSelectedWorkspaceId(workspace.id);
+    setSelectedWorkspaceName(workspace.name);
+    setShowWorkspaceTable(false);
+  };
+
+  // Handle back to workspace selection
+  const handleBackToWorkspaces = () => {
+    setSelectedWorkspaceId('');
+    setSelectedWorkspaceName('');
+    setShowWorkspaceTable(true);
+  };
 
   const handleDelete = async () => {
     if (!deletingUser) return;
@@ -130,37 +134,6 @@ const UserList: React.FC = () => {
     refetch();
   };
 
-  const workspaceOptions = workspaceState.workspaces.map((edge: any) => ({
-    value: edge.node.id,
-    label: edge.node.name,
-    subtitle: edge.node.domain
-  }));
-
-  const handleWorkspaceChange = (workspaceId: string) => {
-    setSelectedWorkspaceId(workspaceId);
-    // Find and store the workspace info immediately when selected
-    const workspace = workspaceOptions.find((w: any) => w.value === workspaceId);
-    if (workspace) {
-      setSelectedWorkspaceInfo(workspace);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-800">Error loading users: {error.message}</p>
-      </div>
-    );
-  }
-
   const users = data?.users?.edges?.map((edge: any) => edge.node) || [];
 
   const getRoleBadgeColor = (role: string) => {
@@ -176,92 +149,169 @@ const UserList: React.FC = () => {
     }
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600 mt-1">
-            Invite, edit, and manage user roles and permissions
-          </p>
-        </div>
-        {selectedWorkspaceId && (
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            icon={Plus}
-          >
-            Invite User
-          </Button>
-        )}
-      </div>
-
-      {/* Workspace Selection */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Workspace Search */}
+  // Show workspace selection table
+  if (showWorkspaceTable) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
           <div>
-            <div className="flex items-center space-x-3 mb-4">
-              <Building2 className="w-5 h-5 text-gray-400" />
-              <h2 className="text-lg font-medium text-gray-900">Select Workspace</h2>
-            </div>
-            <SearchableSelect
-              label="Workspace"
-              value={selectedWorkspaceId}
-              onChange={handleWorkspaceChange}
-              onSearch={handleWorkspaceSearch}
-              onLoadMore={handleLoadMoreWorkspaces}
-              options={workspaceOptions}
-              placeholder="Search and select a workspace"
-              searchPlaceholder="Type to search workspaces..."
-              loading={workspacesLoading || workspaceState.isLoadingMore}
-              hasNextPage={workspaceState.hasNextPage && !workspaceState.isLoadingMore}
-              required
-            />
+            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+            <p className="text-gray-600 mt-1">
+              Select a workspace to manage its users
+            </p>
+          </div>
+        </div>
+
+        {/* Workspace Search */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <Building2 className="w-5 h-5 text-gray-400" />
+            <h2 className="text-lg font-medium text-gray-900">Search Workspace</h2>
+          </div>
+          <Input
+            label="Search for a specific workspace"
+            value={workspaceSearchQuery}
+            onChange={handleWorkspaceSearch}
+            placeholder="Type workspace name to search..."
+          />
+        </div>
+
+        {/* Workspaces Table */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900">Available Workspaces</h3>
+            <p className="text-sm text-gray-600 mt-1">
+              {workspaceSearchQuery ? 'Search results' : 'All workspaces'} ({workspaceState.workspaces.length} loaded)
+            </p>
           </div>
 
-          {/* Selected Workspace Info */}
-          {selectedWorkspaceInfo && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start space-x-3">
-                {/* <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg flex-shrink-0">
-                  <Building2 className="w-5 h-5 text-blue-600" />
-                </div> */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-blue-900 mb-2">
-                    Workspace Info
-                  </h3>
-                  <div className="space-y-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs font-medium text-blue-700">Name:</span>
-                      <span className="text-xs text-blue-800 truncate">{selectedWorkspaceInfo.label}</span>
+          {workspacesLoading && workspaceState.workspaces.length === 0 ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+          ) : workspaceState.workspaces.length === 0 ? (
+            <div className="text-center py-12">
+              <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No workspaces found</h3>
+              <p className="text-gray-600">
+                {workspaceSearchQuery ? 'Try a different search term' : 'No workspaces available'}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Workspace Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Domain
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {workspaceState.workspaces.map((edge: any) => {
+                    const workspace = edge.node;
+                    return (
+                      <tr key={workspace.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <Building2 className="w-5 h-5 text-gray-400 mr-3" />
+                            <div className="text-sm font-medium text-gray-900">
+                              {workspace.name}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {workspace.domain || 'No domain'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            icon={ChevronRight}
+                            onClick={() => handleWorkspaceSelect(workspace)}
+                          >
+                            Manage Users
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              {/* Load More Section */}
+              {(workspaceState.hasNextPage || workspaceState.isLoadingMore) && (
+                <div className="px-6 py-4 border-t border-gray-200 text-center">
+                  {workspaceState.isLoadingMore ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                      <span className="text-sm text-gray-600">Loading more workspaces...</span>
                     </div>
-                    {selectedWorkspaceInfo.subtitle && (
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xs font-medium text-blue-700">Domain:</span>
-                        <span className="text-xs text-blue-800 truncate">{selectedWorkspaceInfo.subtitle}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center space-x-2 pt-1">
-                      <Users className="w-3 h-3 text-blue-600" />
-                      <span className="text-xs text-blue-700">
-                        {users.length} user{users.length !== 1 ? 's' : ''}
-                      </span>
-                    </div>
-                  </div>
+                  ) : (
+                    <Button
+                      variant="secondary"
+                      onClick={handleLoadMoreWorkspaces}
+                      disabled={workspacesLoading}
+                    >
+                      Load More Workspaces
+                    </Button>
+                  )}
                 </div>
-              </div>
+              )}
+
+              {!workspaceState.hasNextPage && !workspaceState.isLoadingMore && workspaceState.workspaces.length > 0 && (
+                <div className="px-6 py-4 border-t border-gray-200 text-center">
+                  <span className="text-sm text-gray-500">No more workspaces to load</span>
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
+    );
+  }
 
-      {!selectedWorkspaceId ? (
-        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-          <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Select a workspace</h3>
-          <p className="text-gray-600">
-            Please select a workspace above to view and manage its users
-          </p>
+  // Show user management for selected workspace
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="secondary"
+            onClick={handleBackToWorkspaces}
+          >
+            ← Back to Workspaces
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+            <p className="text-gray-600 mt-1">
+              Managing users for <span className="font-medium">{selectedWorkspaceName}</span>
+            </p>
+          </div>
+        </div>
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
+          icon={Plus}
+        >
+          Invite User
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">Error loading users: {error.message}</p>
         </div>
       ) : users.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
@@ -377,7 +427,7 @@ const UserList: React.FC = () => {
         title="Invite New User"
       >
         <UserForm
-          loading={workspacesLoading}
+          workspaceId={selectedWorkspaceId}
           onSuccess={handleFormSuccess}
           onCancel={() => setIsCreateModalOpen(false)}
         />
