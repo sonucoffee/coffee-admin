@@ -1,6 +1,10 @@
 import React from "react";
 
-const LoadingSpinner: React.FC = () => {
+interface LoadingSpinnerProps {
+  message?: string;
+}
+
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ message = "Loading Coffee.ai..." }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
@@ -11,7 +15,8 @@ const LoadingSpinner: React.FC = () => {
           />
         </div>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading Coffee.ai...</p>
+        <p className="text-gray-600">{message}</p>
+        <p className="text-xs text-gray-400 mt-2">If this takes too long, try refreshing the page</p>
       </div>
     </div>
   );
