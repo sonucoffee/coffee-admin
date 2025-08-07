@@ -134,6 +134,7 @@ const UserList: React.FC = () => {
   const handleBackToWorkspaces = () => {
     setSelectedWorkspaceId('');
     setSelectedWorkspaceName('');
+    setUserSearchQuery(''); // Clear user search when going back
     setShowWorkspaceTable(true);
   };
 
