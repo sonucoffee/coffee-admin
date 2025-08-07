@@ -265,6 +265,40 @@ const UserList: React.FC = () => {
       )}
 
       {/* Create User Modal */}
+      {/* Selected Workspace Information */}
+      {selectedWorkspace && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <div className="flex items-start space-x-4">
+            <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg">
+              <Building2 className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-semibold text-blue-900 mb-2">
+                Selected Workspace
+              </h2>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-blue-700">Name:</span>
+                  <span className="text-sm text-blue-800">{selectedWorkspace.label}</span>
+                </div>
+                {selectedWorkspace.subtitle && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-medium text-blue-700">Domain:</span>
+                    <span className="text-sm text-blue-800">{selectedWorkspace.subtitle}</span>
+                  </div>
+                )}
+                <div className="flex items-center space-x-2">
+                  <Users className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm text-blue-700">
+                    {users.length} user{users.length !== 1 ? 's' : ''} in this workspace
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
