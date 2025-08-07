@@ -11,6 +11,7 @@ const LoginPage: React.FC = () => {
       authorizationParams: {
         connection: "google-oauth2",
         prompt: "select_account",
+        redirect_uri: window.location.origin,
       },
     });
   };

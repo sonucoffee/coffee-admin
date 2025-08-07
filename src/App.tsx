@@ -93,7 +93,6 @@ const App: React.FC = () => {
       }}
       useRefreshTokens={true}
       cacheLocation="localstorage"
-      skipRedirectCallback={window.location.pathname === '/'}
     >
       <ApolloProvider client={apolloClient}>
         <Router>
