@@ -19,6 +19,7 @@ const UserList: React.FC = () => {
   const [allWorkspaces, setAllWorkspaces] = useState<any[]>([]);
   const [workspaceCursor, setWorkspaceCursor] = useState<string | null>(null);
   const [hasNextPage, setHasNextPage] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Query workspaces for search
   const { data: workspacesData, loading: workspacesLoading, fetchMore } = useQuery(GET_WORKSPACES, {
@@ -32,18 +33,11 @@ const UserList: React.FC = () => {
       const edges = data?.workspaces?.edges || [];
       const pageInfo = data?.workspaces?.pageInfo;
       
-      if (workspaceCursor) {
-        // Append to existing workspaces (lazy loading)
-        setAllWorkspaces(prev => [...prev, ...edges]);
-      } else {
-        // Replace workspaces (new search or initial load)
-        setAllWorkspaces(edges);
-      }
+      // For initial load or new search (when cursor is null)
+      setAllWorkspaces(edges);
       
       setHasNextPage(pageInfo?.hasNextPage || false);
-      if (!workspaceCursor) {
-        setWorkspaceCursor(pageInfo?.endCursor || null);
-      }
+      setWorkspaceCursor(pageInfo?.endCursor || null);
     }
   });
 
@@ -58,40 +52,38 @@ const UserList: React.FC = () => {
 
   const [deleteUser] = useMutation(DELETE_USER_ROLE);
 
-  // Handle workspace search with debouncing - use useCallback to prevent infinite re-renders
+  // Handle loading more workspaces
+  const handleLoadMoreWorkspaces = React.useCallback(() => {
+    if (hasNextPage && !workspacesLoading && !isLoadingMore && workspaceCursor) {
+      setIsLoadingMore(true);
+      fetchMore({
+        variables: {
+          filter: workspaceSearchQuery.trim() ? { search: workspaceSearchQuery.trim() } : {},
+          first: 50,
+          after: workspaceCursor
+        },
+      }).then((result) => {
+        const newEdges = result.data?.workspaces?.edges || [];
+        const pageInfo = result.data?.workspaces?.pageInfo;
+        
+        setAllWorkspaces(prev => [...prev, ...newEdges]);
+        setHasNextPage(pageInfo?.hasNextPage || false);
+        setWorkspaceCursor(pageInfo?.endCursor || null);
+        setIsLoadingMore(false);
+      }).catch((error) => {
+        console.error('Error loading more workspaces:', error);
+        setIsLoadingMore(false);
+      });
+    }
+  }, [hasNextPage, workspacesLoading, isLoadingMore, workspaceCursor, fetchMore, workspaceSearchQuery]);
+
+  // Handle workspace search with debouncing
   const handleWorkspaceSearch = React.useCallback((query: string) => {
     setWorkspaceSearchQuery(query);
     setWorkspaceCursor(null); // Reset cursor for new search
     setAllWorkspaces([]); // Clear existing workspaces for new search
+    setIsLoadingMore(false); // Reset loading more state
   }, []);
-
-  // Handle loading more workspaces
-  const handleLoadMoreWorkspaces = React.useCallback(() => {
-    if (hasNextPage && !workspacesLoading && workspaceCursor) {
-      fetchMore({
-        variables: {
-          after: workspaceCursor
-        },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          if (!fetchMoreResult) return prev;
-          
-          const newEdges = fetchMoreResult.workspaces.edges;
-          const pageInfo = fetchMoreResult.workspaces.pageInfo;
-          
-          setAllWorkspaces(prevWorkspaces => [...prevWorkspaces, ...newEdges]);
-          setHasNextPage(pageInfo?.hasNextPage || false);
-          setWorkspaceCursor(pageInfo?.endCursor || null);
-          
-          return {
-            workspaces: {
-              ...fetchMoreResult.workspaces,
-              edges: [...prev.workspaces.edges, ...newEdges]
-            }
-          };
-        }
-      });
-    }
-  }, [hasNextPage, workspacesLoading, workspaceCursor, fetchMore]);
 
   const handleDelete = async () => {
     if (!deletingUser) return;
@@ -201,8 +193,8 @@ const UserList: React.FC = () => {
               options={workspaceOptions}
               placeholder="Search and select a workspace"
               searchPlaceholder="Type to search workspaces..."
-              loading={workspacesLoading}
-              hasNextPage={hasNextPage}
+              loading={workspacesLoading || isLoadingMore}
+              hasNextPage={hasNextPage && !isLoadingMore}
               required
             />
           </div>
