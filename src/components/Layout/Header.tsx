@@ -8,7 +8,7 @@ const Header: React.FC = () => {
   const handleLogout = () => {
     logout({ 
       logoutParams: { 
-        returnTo: window.location.origin 
+        returnTo: window.location.origin,
       } 
     });
   };

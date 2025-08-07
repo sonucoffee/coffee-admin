@@ -10,6 +10,7 @@ const LoginPage: React.FC = () => {
     loginWithRedirect({
       authorizationParams: {
         connection: "google-oauth2",
+        prompt: "select_account",
       },
     });
   };
