@@ -25,7 +25,8 @@ const UserList: React.FC = () => {
   const { data: workspacesData, loading: workspacesLoading, fetchMore } = useQuery(GET_WORKSPACES, {
     variables: {
       filter: workspaceSearchQuery.trim() ? { search: workspaceSearchQuery.trim() } : {},
-      first: 50
+      first: 50,
+      after: null
     },
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
