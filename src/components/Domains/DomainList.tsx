@@ -64,7 +64,7 @@ const DomainList: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Whitelist Domains</h1>
           <p className="text-gray-600 mt-1">
-            Manage domains that are allowed to access your Coffee.ai workspace
+            Manage domains that are allowed to access your workspace
           </p>
         </div>
         <Button

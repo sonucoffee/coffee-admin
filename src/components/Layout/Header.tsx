@@ -28,7 +28,7 @@ const Header: React.FC = () => {
                 />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Coffee.ai</h1>
+              <h1 className="text-xl font-bold text-gray-900">The Coffee Bar</h1>
               <p className="text-sm text-gray-500">Internal Admin Tool</p>
             </div>
           </div>

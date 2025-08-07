@@ -46,11 +46,10 @@ const LoginPage: React.FC = () => {
             />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Coffee.ai Admin
+            The Coffee Bar
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Internal administration tool for managing domains and users in your
-            Coffee.ai workspace
+            Internal administration tool for managing domains and users in your workspace
           </p>
         </div>
 
@@ -78,7 +77,7 @@ const LoginPage: React.FC = () => {
             Sign in to continue
           </h2>
           <p className="text-gray-600 mb-8">
-            Use your Google account to access the Coffee.ai admin panel
+            Use your Google account to access The Coffee Bar admin panel
           </p>
 
           <Button onClick={handleLogin} size="lg" className="px-8 py-3">

@@ -32,7 +32,7 @@ const UnauthorizedPage: React.FC = () => {
               <img
                 src="coffee-logo-bean-64.png"
                 className="w-16 h-16 rounded-full"
-                alt="Coffee.ai"
+                alt="The Coffee Bar"
               />
             </div>
             
@@ -91,7 +91,7 @@ const UnauthorizedPage: React.FC = () => {
         {/* Footer */}
         <div className="text-center mt-6">
           <p className="text-xs text-gray-400">
-            Coffee.ai Admin Panel • Secure Access Required
+            The Coffee Bar Admin Panel • Secure Access Required
           </p>
         </div>
       </div>
