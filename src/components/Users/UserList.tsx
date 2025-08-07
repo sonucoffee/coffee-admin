@@ -120,7 +120,6 @@ const UserList: React.FC = () => {
     refetch();
   };
 
-  const workspaceOptions = allWorkspaces.map((edge: any) => ({
   const workspaceOptions = workspaceState.workspaces.map((edge: any) => ({
     value: edge.node.id,
     label: edge.node.name,
