@@ -59,3 +59,4 @@ export interface UpdateUserInput {
 export interface DeleteUserRoleInput {
   userId: number;
   workspaceId: number;
+}
