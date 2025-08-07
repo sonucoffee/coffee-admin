@@ -21,11 +21,10 @@ const UserList: React.FC = () => {
   const [hasNextPage, setHasNextPage] = useState(false);
 
   // Query workspaces for search
-  const { data: workspacesData, loading: workspacesLoading, refetch: refetchWorkspaces } = useQuery(GET_WORKSPACES, {
+  const { data: workspacesData, loading: workspacesLoading, fetchMore } = useQuery(GET_WORKSPACES, {
     variables: {
       filter: workspaceSearchQuery.trim() ? { search: workspaceSearchQuery.trim() } : {},
-      first: 50,
-      after: workspaceCursor
+      first: 50
     },
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
@@ -42,7 +41,9 @@ const UserList: React.FC = () => {
       }
       
       setHasNextPage(pageInfo?.hasNextPage || false);
-      setWorkspaceCursor(pageInfo?.endCursor || null);
+      if (!workspaceCursor) {
+        setWorkspaceCursor(pageInfo?.endCursor || null);
+      }
     }
   });
 
@@ -57,22 +58,40 @@ const UserList: React.FC = () => {
 
   const [deleteUser] = useMutation(DELETE_USER_ROLE);
 
-  // Handle workspace search with debouncing
-  const handleWorkspaceSearch = (query: string) => {
+  // Handle workspace search with debouncing - use useCallback to prevent infinite re-renders
+  const handleWorkspaceSearch = React.useCallback((query: string) => {
     setWorkspaceSearchQuery(query);
     setWorkspaceCursor(null); // Reset cursor for new search
-  };
+    setAllWorkspaces([]); // Clear existing workspaces for new search
+  }, []);
 
   // Handle loading more workspaces
-  const handleLoadMoreWorkspaces = () => {
+  const handleLoadMoreWorkspaces = React.useCallback(() => {
     if (hasNextPage && !workspacesLoading && workspaceCursor) {
-      refetchWorkspaces({
-        filter: workspaceSearchQuery.trim() ? { search: workspaceSearchQuery.trim() } : {},
-        first: 50,
-        after: workspaceCursor
+      fetchMore({
+        variables: {
+          after: workspaceCursor
+        },
+        updateQuery: (prev, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return prev;
+          
+          const newEdges = fetchMoreResult.workspaces.edges;
+          const pageInfo = fetchMoreResult.workspaces.pageInfo;
+          
+          setAllWorkspaces(prevWorkspaces => [...prevWorkspaces, ...newEdges]);
+          setHasNextPage(pageInfo?.hasNextPage || false);
+          setWorkspaceCursor(pageInfo?.endCursor || null);
+          
+          return {
+            workspaces: {
+              ...fetchMoreResult.workspaces,
+              edges: [...prev.workspaces.edges, ...newEdges]
+            }
+          };
+        }
       });
     }
-  };
+  }, [hasNextPage, workspacesLoading, workspaceCursor, fetchMore]);
 
   const handleDelete = async () => {
     if (!deletingUser) return;
