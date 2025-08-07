@@ -20,10 +20,10 @@ const UserList: React.FC = () => {
   // Query workspaces for search
   const { data: workspacesData, loading: workspacesLoading } = useQuery(GET_WORKSPACES, {
     variables: {
-      filter: workspaceSearchQuery ? { search: workspaceSearchQuery } : {},
+      filter: workspaceSearchQuery ? { search: workspaceSearchQuery } : undefined,
       first: 20
     },
-    skip: !workspaceSearchQuery
+    // Remove skip condition to allow fetching workspaces without search
   });
 
   const { data, loading, error, refetch } = useQuery(GET_USERS, {
