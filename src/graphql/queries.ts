@@ -1,0 +1,56 @@
+import { gql } from '@apollo/client';
+
+export const GET_DOMAIN_ALLOWLISTS = gql`
+  query GetDomainAllowlists($filter: DomainAllowlistFilter) {
+    domainAllowlists(filter: $filter) {
+      id
+      domain
+      createdAt
+      updatedAt
+      createdBy {
+        id
+        email
+        givenName
+        surname
+      }
+    }
+  }
+`;
+
+export const GET_USERS = gql`
+  query GetUsers($filter: UserFilterInput!, $first: Int, $after: String) {
+    users(filter: $filter, first: $first, after: $after) {
+      edges {
+        node {
+          id
+          email
+          givenName
+          surname
+          profileImageUrl
+          isOnboarded
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
+export const GET_ME = gql`
+  query GetMe($lastWorkspaceId: ID) {
+    me(lastWorkspaceId: $lastWorkspaceId) {
+      id
+      email
+      givenName
+      surname
+      profileImageUrl
+      workspaces {
+        id
+        name
+        domain
+      }
+    }
+  }
+`;
