@@ -18,7 +18,7 @@ export interface User {
   surname: string;
   profileImageUrl?: string;
   isOnboarded: boolean;
-  role?: string;
+  role(workspaceId: string): String
   inviteStatus?: string;
   lastLoginTs?: string;
 }
