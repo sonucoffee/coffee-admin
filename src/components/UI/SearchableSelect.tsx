@@ -210,6 +210,12 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                       <p className="text-xs text-gray-500 mt-1">Loading more...</p>
                     </div>
                   )}
+                  
+                  {!hasNextPage && options.length > 0 && (
+                    <div className="p-3 text-center border-t border-gray-200">
+                      <p className="text-xs text-gray-500">No more workspaces to load</p>
+                    </div>
+                  )}
                 </>
               )}
             </div>

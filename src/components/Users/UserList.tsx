@@ -16,13 +16,15 @@ const UserList: React.FC = () => {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState('');
   const [selectedWorkspaceInfo, setSelectedWorkspaceInfo] = useState<{value: string, label: string, subtitle?: string} | null>(null);
   const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
-  const [allWorkspaces, setAllWorkspaces] = useState<any[]>([]);
-  const [workspaceCursor, setWorkspaceCursor] = useState<string | null>(null);
-  const [hasNextPage, setHasNextPage] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [workspaceState, setWorkspaceState] = useState({
+    workspaces: [] as any[],
+    hasNextPage: false,
+    endCursor: null as string | null,
+    isLoadingMore: false
+  });
 
   // Query workspaces for search
-  const { data: workspacesData, loading: workspacesLoading, fetchMore } = useQuery(GET_WORKSPACES, {
+  const { loading: workspacesLoading, fetchMore } = useQuery(GET_WORKSPACES, {
     variables: {
       filter: workspaceSearchQuery.trim() ? { search: workspaceSearchQuery.trim() } : {},
       first: 50,
@@ -34,11 +36,12 @@ const UserList: React.FC = () => {
       const edges = data?.workspaces?.edges || [];
       const pageInfo = data?.workspaces?.pageInfo;
       
-      // For initial load or new search (when cursor is null)
-      setAllWorkspaces(edges);
-      
-      setHasNextPage(pageInfo?.hasNextPage || false);
-      setWorkspaceCursor(pageInfo?.endCursor || null);
+      setWorkspaceState({
+        workspaces: edges,
+        hasNextPage: pageInfo?.hasNextPage || false,
+        endCursor: pageInfo?.endCursor || null,
+        isLoadingMore: false
+      });
     }
   });
 
@@ -55,35 +58,41 @@ const UserList: React.FC = () => {
 
   // Handle loading more workspaces
   const handleLoadMoreWorkspaces = React.useCallback(() => {
-    if (hasNextPage && !workspacesLoading && !isLoadingMore && workspaceCursor) {
-      setIsLoadingMore(true);
+    if (workspaceState.hasNextPage && !workspacesLoading && !workspaceState.isLoadingMore && workspaceState.endCursor) {
+      setWorkspaceState(prev => ({ ...prev, isLoadingMore: true }));
+      
       fetchMore({
         variables: {
           filter: workspaceSearchQuery.trim() ? { search: workspaceSearchQuery.trim() } : {},
           first: 50,
-          after: workspaceCursor
+          after: workspaceState.endCursor
         },
       }).then((result) => {
         const newEdges = result.data?.workspaces?.edges || [];
         const pageInfo = result.data?.workspaces?.pageInfo;
         
-        setAllWorkspaces(prev => [...prev, ...newEdges]);
-        setHasNextPage(pageInfo?.hasNextPage || false);
-        setWorkspaceCursor(pageInfo?.endCursor || null);
-        setIsLoadingMore(false);
+        setWorkspaceState(prev => ({
+          workspaces: [...prev.workspaces, ...newEdges],
+          hasNextPage: pageInfo?.hasNextPage || false,
+          endCursor: pageInfo?.endCursor || null,
+          isLoadingMore: false
+        }));
       }).catch((error) => {
         console.error('Error loading more workspaces:', error);
-        setIsLoadingMore(false);
+        setWorkspaceState(prev => ({ ...prev, isLoadingMore: false }));
       });
     }
-  }, [hasNextPage, workspacesLoading, isLoadingMore, workspaceCursor, fetchMore, workspaceSearchQuery]);
+  }, [workspaceState.hasNextPage, workspacesLoading, workspaceState.isLoadingMore, workspaceState.endCursor, fetchMore, workspaceSearchQuery]);
 
   // Handle workspace search with debouncing
   const handleWorkspaceSearch = React.useCallback((query: string) => {
     setWorkspaceSearchQuery(query);
-    setWorkspaceCursor(null); // Reset cursor for new search
-    setAllWorkspaces([]); // Clear existing workspaces for new search
-    setIsLoadingMore(false); // Reset loading more state
+    setWorkspaceState({
+      workspaces: [],
+      hasNextPage: false,
+      endCursor: null,
+      isLoadingMore: false
+    });
   }, []);
 
   const handleDelete = async () => {
@@ -112,6 +121,7 @@ const UserList: React.FC = () => {
   };
 
   const workspaceOptions = allWorkspaces.map((edge: any) => ({
+  const workspaceOptions = workspaceState.workspaces.map((edge: any) => ({
     value: edge.node.id,
     label: edge.node.name,
     subtitle: edge.node.domain
@@ -194,8 +204,8 @@ const UserList: React.FC = () => {
               options={workspaceOptions}
               placeholder="Search and select a workspace"
               searchPlaceholder="Type to search workspaces..."
-              loading={workspacesLoading || isLoadingMore}
-              hasNextPage={hasNextPage && !isLoadingMore}
+              loading={workspacesLoading || workspaceState.isLoadingMore}
+              hasNextPage={workspaceState.hasNextPage && !workspaceState.isLoadingMore}
               required
             />
           </div>
