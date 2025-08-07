@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client';
-import { Building2, Edit2, Mail, Plus, Shield, Trash2, User } from 'lucide-react';
+import { Building2, Edit2, Mail, Plus, Shield, Trash2, User, Users } from 'lucide-react';
 import React, { useState } from 'react';
 import { DELETE_USER_ROLE } from '../../graphql/mutations';
 import { GET_USERS, GET_WORKSPACES } from '../../graphql/queries';
@@ -226,7 +226,7 @@ const UserList: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(user.role || 'User')}`}>
                         <Shield className="w-3 h-3 mr-1" />
-                        {user.role || 'User'}
+                        {user.role(selectedWorkspaceId) || 'User'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -264,7 +264,6 @@ const UserList: React.FC = () => {
         </div>
       )}
 
-      {/* Create User Modal */}
       {/* Selected Workspace Information */}
       {selectedWorkspace && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
@@ -299,6 +298,7 @@ const UserList: React.FC = () => {
         </div>
       )}
 
+      {/* Create User Modal */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
