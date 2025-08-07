@@ -18,14 +18,16 @@ const UserList: React.FC = () => {
   const [selectedWorkspaceName, setSelectedWorkspaceName] = useState('');
   const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
   const [showWorkspaceTable, setShowWorkspaceTable] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Workspace pagination state
   const [workspaceState, setWorkspaceState] = useState({
     workspaces: [] as any[],
     hasNextPage: false,
-    endCursor: null as string | null,
-    isLoadingMore: false
+    endCursor: null as string | null
   });
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Query workspaces with pagination
   const { loading: workspacesLoading, fetchMore: fetchMoreWorkspaces } = useQuery(GET_WORKSPACES, {
@@ -42,9 +44,9 @@ const UserList: React.FC = () => {
       setWorkspaceState({
         workspaces: edges,
         hasNextPage: pageInfo?.hasNextPage || false,
-        endCursor: pageInfo?.endCursor || null,
-        isLoadingMore: false
+        endCursor: pageInfo?.endCursor || null
       });
+      setIsLoadingMore(false);
     }
   });
 
@@ -66,9 +68,9 @@ const UserList: React.FC = () => {
   };
 
   // Handle load more workspaces
-  const handleLoadMoreWorkspaces = async () => {
-    if (workspaceState.hasNextPage && !workspacesLoading && !workspaceState.isLoadingMore && workspaceState.endCursor) {
-      setWorkspaceState(prev => ({ ...prev, isLoadingMore: true }));
+  const handleLoadMoreWorkspaces = React.useCallback(async () => {
+    if (workspaceState.hasNextPage && !workspacesLoading && !isLoadingMore && workspaceState.endCursor) {
+      setIsLoadingMore(true);
       
       try {
         const result = await fetchMoreWorkspaces({
@@ -85,15 +87,36 @@ const UserList: React.FC = () => {
         setWorkspaceState(prev => ({
           workspaces: [...prev.workspaces, ...newEdges],
           hasNextPage: pageInfo?.hasNextPage || false,
-          endCursor: pageInfo?.endCursor || null,
-          isLoadingMore: false
+          endCursor: pageInfo?.endCursor || null
         }));
       } catch (error) {
         console.error('Error loading more workspaces:', error);
-        setWorkspaceState(prev => ({ ...prev, isLoadingMore: false }));
+      } finally {
+        setIsLoadingMore(false);
       }
     }
-  };
+  }, [workspaceState.hasNextPage, workspacesLoading, isLoadingMore, workspaceState.endCursor, fetchMoreWorkspaces, workspaceSearchQuery]);
+
+  // Auto-scroll loading effect
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      
+      // Load more when user scrolls to within 50px of bottom
+      if (scrollTop + clientHeight >= scrollHeight - 50 && 
+          workspaceState.hasNextPage && 
+          !workspacesLoading && 
+          !isLoadingMore) {
+        handleLoadMoreWorkspaces();
+      }
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll);
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, [handleLoadMoreWorkspaces, workspaceState.hasNextPage, workspacesLoading, isLoadingMore]);
 
   // Handle workspace selection
   const handleWorkspaceSelect = (workspace: any) => {
@@ -181,11 +204,11 @@ const UserList: React.FC = () => {
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Available Workspaces</h3>
             <p className="text-sm text-gray-600 mt-1">
-              {workspaceSearchQuery ? 'Search results' : 'All workspaces'} ({workspaceState.workspaces.length} loaded)
+              {workspaceSearchQuery ? 'Search results' : 'All workspaces'} ({workspaceState.workspaces.length} loaded){workspaceState.hasNextPage ? ' - Scroll down for more' : ''}
             </p>
           </div>
 
-          {workspacesLoading && workspaceState.workspaces.length === 0 ? (
+          {(workspacesLoading && workspaceState.workspaces.length === 0) ? (
             <div className="flex items-center justify-center h-96">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
             </div>
@@ -199,7 +222,7 @@ const UserList: React.FC = () => {
             </div>
           ) : (
             <div className="flex-1 overflow-hidden">
-              <div className="h-96 overflow-y-auto">
+              <div ref={scrollContainerRef} className="h-96 overflow-y-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -247,33 +270,24 @@ const UserList: React.FC = () => {
                   })}
                 </tbody>
               </table>
-              </div>
 
-              {/* Load More Section */}
-              {(workspaceState.hasNextPage || workspaceState.isLoadingMore) && (
-                <div className="px-6 py-4 border-t border-gray-200 text-center">
-                  {workspaceState.isLoadingMore ? (
+                {/* Loading indicator at bottom of table */}
+                {isLoadingMore && (
+                  <div className="text-center py-4 border-t border-gray-200">
                     <div className="flex items-center justify-center space-x-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
                       <span className="text-sm text-gray-600">Loading more workspaces...</span>
                     </div>
-                  ) : (
-                    <Button
-                      variant="secondary"
-                      onClick={handleLoadMoreWorkspaces}
-                      disabled={workspacesLoading}
-                    >
-                      Load More Workspaces
-                    </Button>
-                  )}
-                </div>
-              )}
+                  </div>
+                )}
 
-              {!workspaceState.hasNextPage && !workspaceState.isLoadingMore && workspaceState.workspaces.length > 0 && (
-                <div className="px-6 py-4 border-t border-gray-200 text-center">
-                  <span className="text-sm text-gray-500">No more workspaces to load</span>
-                </div>
-              )}
+                {/* End of results indicator */}
+                {!workspaceState.hasNextPage && !isLoadingMore && workspaceState.workspaces.length > 0 && (
+                  <div className="text-center py-4 border-t border-gray-200">
+                    <span className="text-sm text-gray-500">No more workspaces to load</span>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
