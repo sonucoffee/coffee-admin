@@ -77,18 +77,22 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   // Infinite scroll handler
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer || !onLoadMore || !hasNextPage) return;
+    if (!scrollContainer || !onLoadMore) return;
 
     const handleScroll = () => {
+      console.log('Scroll detected');
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-      if (scrollTop + clientHeight >= scrollHeight - 10) {
+      console.log('Scroll values:', { scrollTop, scrollHeight, clientHeight, hasNextPage });
+      
+      if (scrollTop + clientHeight >= scrollHeight - 10 && hasNextPage && !loading) {
+        console.log('Triggering onLoadMore');
         onLoadMore();
       }
     };
 
     scrollContainer.addEventListener('scroll', handleScroll);
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
-  }, [onLoadMore, hasNextPage]);
+  }, [onLoadMore, hasNextPage, loading]);
   const handleSelect = (optionValue: string) => {
     onChange(optionValue);
     setIsOpen(false);
@@ -206,8 +210,19 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                   
                   {hasNextPage && (
                     <div className="p-3 text-center border-t border-gray-200">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mx-auto"></div>
-                      <p className="text-xs text-gray-500 mt-1">Loading more...</p>
+                      {loading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mx-auto"></div>
+                          <p className="text-xs text-gray-500 mt-1">Loading more...</p>
+                        </>
+                      ) : (
+                        <button
+                          onClick={onLoadMore}
+                          className="text-xs text-blue-600 hover:text-blue-800"
+                        >
+                          Load more workspaces
+                        </button>
+                      )}
                     </div>
                   )}
                   

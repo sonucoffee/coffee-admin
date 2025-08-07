@@ -58,6 +58,13 @@ const UserList: React.FC = () => {
 
   // Handle loading more workspaces
   const handleLoadMoreWorkspaces = React.useCallback(() => {
+    console.log('handleLoadMoreWorkspaces called', {
+      hasNextPage: workspaceState.hasNextPage,
+      isLoadingMore: workspaceState.isLoadingMore,
+      endCursor: workspaceState.endCursor,
+      workspacesLoading
+    });
+    
     if (workspaceState.hasNextPage && !workspacesLoading && !workspaceState.isLoadingMore && workspaceState.endCursor) {
       setWorkspaceState(prev => ({ ...prev, isLoadingMore: true }));
       
@@ -68,6 +75,7 @@ const UserList: React.FC = () => {
           after: workspaceState.endCursor
         },
       }).then((result) => {
+        console.log('fetchMore result:', result);
         const newEdges = result.data?.workspaces?.edges || [];
         const pageInfo = result.data?.workspaces?.pageInfo;
         
@@ -81,6 +89,8 @@ const UserList: React.FC = () => {
         console.error('Error loading more workspaces:', error);
         setWorkspaceState(prev => ({ ...prev, isLoadingMore: false }));
       });
+    } else {
+      console.log('Load more conditions not met');
     }
   }, [workspaceState.hasNextPage, workspacesLoading, workspaceState.isLoadingMore, workspaceState.endCursor, fetchMore, workspaceSearchQuery]);
 
@@ -367,7 +377,7 @@ const UserList: React.FC = () => {
         title="Invite New User"
       >
         <UserForm
-          workspaceId={selectedWorkspaceId}
+          loading={workspacesLoading}
           onSuccess={handleFormSuccess}
           onCancel={() => setIsCreateModalOpen(false)}
         />
