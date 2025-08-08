@@ -14,7 +14,7 @@ import CreateWorkspace from './components/Workspaces/CreateWorkspace';
 import LoadingSpinner from './components/UI/LoadingSpinner';
 
 const AuthorizedApp: React.FC = () => {
-  const { data, loading, error } = useQuery(GET_ME, {
+  const { data, loading, error, refetch } = useQuery(GET_ME, {
     fetchPolicy: 'network-only'
   });
 
@@ -63,6 +63,7 @@ const AuthorizedApp: React.FC = () => {
 
 const AppContent: React.FC = () => {
   const { isLoading, isAuthenticated, getAccessTokenSilently, error } = useAuth0();
+  const [hasRefetchedOnLogin, setHasRefetchedOnLogin] = React.useState(false);
 
   React.useEffect(() => {
     const getToken = async () => {
@@ -85,6 +86,19 @@ const AppContent: React.FC = () => {
 
     getToken();
   }, [isAuthenticated, getAccessTokenSilently]);
+
+  // Refetch ME data when user becomes authenticated
+  React.useEffect(() => {
+    if (isAuthenticated && !hasRefetchedOnLogin) {
+      // Small delay to ensure token is set
+      setTimeout(() => {
+        // This will trigger a refetch in the AuthorizedApp component
+        setHasRefetchedOnLogin(true);
+      }, 100);
+    } else if (!isAuthenticated) {
+      setHasRefetchedOnLogin(false);
+    }
+  }, [isAuthenticated, hasRefetchedOnLogin]);
 
   // Handle Auth0 errors
   if (error) {
@@ -119,7 +133,7 @@ const AppContent: React.FC = () => {
   }
 
   // User is authenticated, now check if they're authorized
-  return <AuthorizedApp />;
+  return <AuthorizedApp key={hasRefetchedOnLogin ? 'authenticated' : 'initial'} />;
 };
 
 const App: React.FC = () => {
