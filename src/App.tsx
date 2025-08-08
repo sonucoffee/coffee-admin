@@ -111,12 +111,30 @@ const AppContent: React.FC = () => {
   // Handle Auth0 errors
   if (error) {
     console.error('Auth0 Error:', error);
+    
+    // Check if it's a domain not in allowlist error
+    const isDomainError = error.message?.includes('Domain not in allowlist') || 
+                         error.error_description === 'Domain not in allowlist';
+    
+    if (isDomainError) {
+      // Redirect to login page which will handle the domain error display
+      return (
+        <Layout>
+          <LoginPage />
+        </Layout>
+      );
+    }
+    
+    // Handle other authentication errors
     return (
       <Layout>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Authentication Error</h2>
             <p className="text-gray-600 mb-4">There was an issue with authentication. Please try logging in again.</p>
+            <div className="text-sm text-gray-500 mb-4">
+              Error: {error.message || 'Unknown authentication error'}
+            </div>
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
