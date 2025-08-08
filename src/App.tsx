@@ -14,7 +14,9 @@ import CreateWorkspace from './components/Workspaces/CreateWorkspace';
 import LoadingSpinner from './components/UI/LoadingSpinner';
 
 const AuthorizedApp: React.FC = () => {
-  const { data, loading, error } = useQuery(GET_ME);
+  const { data, loading, error } = useQuery(GET_ME, {
+    fetchPolicy: 'network-only'
+  });
 
   if (loading) {
     return <LoadingSpinner message="Checking permissions..." />;
