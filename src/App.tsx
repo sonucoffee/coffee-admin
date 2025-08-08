@@ -14,8 +14,10 @@ import CreateWorkspace from './components/Workspaces/CreateWorkspace';
 import LoadingSpinner from './components/UI/LoadingSpinner';
 
 const AuthorizedApp: React.FC = () => {
-  const { data, loading, error, refetch } = useQuery(GET_ME, {
-    fetchPolicy: 'network-only'
+  const { data, loading, error } = useQuery(GET_ME, {
+    fetchPolicy: 'network-only',
+    notifyOnNetworkStatusChange: true,
+    errorPolicy: 'all'
   });
 
   if (loading) {
@@ -89,6 +91,100 @@ const AppContent: React.FC = () => {
 
   // Refetch ME data when user becomes authenticated
   React.useEffect(() => {
+    if (isAuthenticated && !hasRefetchedOnLogin && !isLoading) {
+      // Small delay to ensure token is set
+      setTimeout(() => {
+        // Force Apollo to refetch with new token by clearing cache and refetching
+        apolloClient.resetStore().then(() => {
+          setHasRefetchedOnLogin(true);
+        });
+      }, 500); // Increased delay to ensure token is properly set
+    } else if (!isAuthenticated) {
+      setHasRefetchedOnLogin(false);
+      // Clear Apollo cache on logout
+      apolloClient.clearStore();
+    }
+  }, [isAuthenticated, hasRefetchedOnLogin, isLoading]);
+
+  // Also reset Apollo cache when token changes
+  React.useEffect(() => {
+    const checkTokenAndReset = async () => {
+      if (isAuthenticated) {
+        try {
+          const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: auth0Config.audience,
+            },
+            cacheMode: 'off' // Force fresh token
+          });
+          const currentToken = localStorage.getItem('auth0_token');
+          
+          // If token changed, update storage and reset Apollo cache
+          if (token !== currentToken) {
+            localStorage.setItem('auth0_token', token);
+            apolloClient.resetStore();
+          }
+        } catch (error) {
+          console.error('Error getting fresh token:', error);
+          localStorage.removeItem('auth0_token');
+        }
+      }
+    };
+
+    if (isAuthenticated && hasRefetchedOnLogin) {
+      checkTokenAndReset();
+    }
+  }, [isAuthenticated, getAccessTokenSilently, hasRefetchedOnLogin]);
+
+  // Original token setting effect - modified
+  React.useEffect(() => {
+    const getToken = async () => {
+      if (isAuthenticated) {
+        try {
+          const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: auth0Config.audience,
+            },
+            cacheMode: 'off' // Force fresh token on login
+          });
+          localStorage.setItem('auth0_token', token);
+        } catch (error) {
+          console.error('Error getting token:', error);
+          localStorage.removeItem('auth0_token');
+        }
+      } else {
+        localStorage.removeItem('auth0_token');
+      }
+    };
+
+    getToken();
+  }, [isAuthenticated, getAccessTokenSilently]);
+
+  // Remove the old token effect and refetch logic since we're handling it above
+  /*
+  React.useEffect(() => {
+    const getToken = async () => {
+      if (isAuthenticated) {
+        try {
+          const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: auth0Config.audience,
+            },
+            cacheMode: 'on'
+          });
+          localStorage.setItem('auth0_token', token);
+        } catch (error) {
+          console.error('Error getting token:', error);
+          localStorage.removeItem('auth0_token');
+        }
+      }
+    };
+
+    getToken();
+  }, [isAuthenticated, getAccessTokenSilently]);
+
+  // Refetch ME data when user becomes authenticated
+  React.useEffect(() => {
     if (isAuthenticated && !hasRefetchedOnLogin) {
       // Small delay to ensure token is set
       setTimeout(() => {
@@ -99,6 +195,7 @@ const AppContent: React.FC = () => {
       setHasRefetchedOnLogin(false);
     }
   }, [isAuthenticated, hasRefetchedOnLogin]);
+  */
 
   // Handle Auth0 errors
   if (error) {
