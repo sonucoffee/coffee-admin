@@ -14,7 +14,12 @@ import CreateWorkspace from './components/Workspaces/CreateWorkspace';
 import LoadingSpinner from './components/UI/LoadingSpinner';
 
 const AuthorizedApp: React.FC = () => {
-  const { data, loading, error } = useQuery(GET_ME);
+  const { data, loading, error, refetch } = useQuery(GET_ME, {
+    fetchPolicy: 'network-only',
+    notifyOnNetworkStatusChange: true,
+    errorPolicy: 'all',
+    skip: false
+  });
 
   if (loading) {
     return <LoadingSpinner message="Checking permissions..." />;
@@ -61,38 +66,74 @@ const AuthorizedApp: React.FC = () => {
 
 const AppContent: React.FC = () => {
   const { isLoading, isAuthenticated, getAccessTokenSilently, error } = useAuth0();
+  const [tokenReady, setTokenReady] = React.useState(false);
+  const [isInitializing, setIsInitializing] = React.useState(true);
 
+  // Single effect to handle token and initialization
   React.useEffect(() => {
-    const getToken = async () => {
+    const initializeAuth = async () => {
       if (isAuthenticated) {
         try {
+          setIsInitializing(true);
           const token = await getAccessTokenSilently({
             authorizationParams: {
               audience: auth0Config.audience,
             },
-            cacheMode: 'on'
+            cacheMode: 'off'
           });
+          
           localStorage.setItem('auth0_token', token);
+          
+          // Reset Apollo cache once with new token
+          await apolloClient.resetStore();
+          
+          setTokenReady(true);
+          setIsInitializing(false);
         } catch (error) {
           console.error('Error getting token:', error);
-          // Clear any stale tokens on error
           localStorage.removeItem('auth0_token');
+          setTokenReady(false);
+          setIsInitializing(false);
         }
+      } else {
+        localStorage.removeItem('auth0_token');
+        apolloClient.clearStore();
+        setTokenReady(false);
+        setIsInitializing(false);
       }
     };
 
-    getToken();
-  }, [isAuthenticated, getAccessTokenSilently]);
+    if (!isLoading) {
+      initializeAuth();
+    }
+  }, [isAuthenticated, isLoading, getAccessTokenSilently]);
 
   // Handle Auth0 errors
   if (error) {
     console.error('Auth0 Error:', error);
+    
+    // Check if it's a domain not in allowlist error
+    const isDomainError = error.message?.includes('Domain not in allowlist');
+    
+    if (isDomainError) {
+      // Redirect to login page which will handle the domain error display
+      return (
+        <Layout>
+          <LoginPage />
+        </Layout>
+      );
+    }
+    
+    // Handle other authentication errors
     return (
       <Layout>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Authentication Error</h2>
             <p className="text-gray-600 mb-4">There was an issue with authentication. Please try logging in again.</p>
+            <div className="text-sm text-gray-500 mb-4">
+              Error: {error.message || 'Unknown authentication error'}
+            </div>
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
@@ -104,7 +145,8 @@ const AppContent: React.FC = () => {
       </Layout>
     );
   }
-  if (isLoading) {
+  
+  if (isLoading || isInitializing) {
     return <LoadingSpinner />;
   }
 
@@ -117,7 +159,7 @@ const AppContent: React.FC = () => {
   }
 
   // User is authenticated, now check if they're authorized
-  return <AuthorizedApp />;
+  return tokenReady ? <AuthorizedApp /> : <LoadingSpinner message="Preparing your workspace..." />;
 };
 
 const App: React.FC = () => {

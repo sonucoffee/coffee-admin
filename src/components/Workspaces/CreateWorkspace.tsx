@@ -44,6 +44,12 @@ const CreateWorkspace: React.FC = () => {
       return;
     }
 
+    if (!domain.trim()) {
+      setError('Domain is required');
+      setLoading(false);
+      return;
+    }
+
     if (domain && !validateDomain(domain.trim())) {
       setError('Please enter a valid domain name');
       setLoading(false);
@@ -60,7 +66,8 @@ const CreateWorkspace: React.FC = () => {
       const input: CreateWorkspaceInput = {
         name: name.trim(),
         ...(domain.trim() && { domain: domain.trim() }),
-        ...(logoUrl.trim() && { logoUrl: logoUrl.trim() })
+        ...(logoUrl.trim() && { logoUrl: logoUrl.trim() }),
+        addCreatorAsOwner: false
       };
 
       const result = await createWorkspace({
@@ -119,7 +126,8 @@ const CreateWorkspace: React.FC = () => {
               label="Domain"
               value={domain}
               onChange={setDomain}
-              placeholder="company.com (optional)"
+              placeholder="company.com"
+              required
               disabled={loading}
             />
 

@@ -4,7 +4,7 @@ interface LoadingSpinnerProps {
   message?: string;
 }
 
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ message = "Loading Coffee.ai..." }) => {
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ message = "Loading The Coffee Bar..." }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">

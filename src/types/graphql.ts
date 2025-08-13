@@ -72,6 +72,7 @@ export interface CreateWorkspaceInput {
   logoUrl?: string;
   owners?: CreateWorkspaceUserInput[];
   users?: CreateWorkspaceUserInput[];
+  addCreatorAsOwner?: boolean;
 }
 
 export interface CreateWorkspaceUserInput {
