@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { Plus, Edit2, Trash2, Globe, Calendar, User } from 'lucide-react';
+import { Plus, Edit2, Trash2, Globe, Calendar, User, Search, ArrowUpDown, Download } from 'lucide-react';
 import { GET_DOMAIN_ALLOWLISTS } from '../../graphql/queries';
 import { DELETE_DOMAIN_ALLOWLIST } from '../../graphql/mutations';
 import { DomainAllowlist } from '../../types/graphql';
 import Button from '../UI/Button';
+import Input from '../UI/Input';
+import Select from '../UI/Select';
 import Modal from '../UI/Modal';
 import DomainForm from './DomainForm';
 
@@ -12,6 +14,9 @@ const DomainList: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingDomain, setEditingDomain] = useState<DomainAllowlist | null>(null);
   const [deletingDomain, setDeletingDomain] = useState<DomainAllowlist | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState<'domain' | 'createdAt' | 'createdBy'>('domain');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const { data, loading, error, refetch } = useQuery(GET_DOMAIN_ALLOWLISTS);
   const [deleteDomain] = useMutation(DELETE_DOMAIN_ALLOWLIST);
@@ -40,6 +45,39 @@ const DomainList: React.FC = () => {
     refetch();
   };
 
+  const exportToCSV = () => {
+    const csvData = filteredAndSortedDomains.map(domain => ({
+      Domain: domain.domain,
+      'Created By': domain.createdBy ? `${domain.createdBy.givenName} ${domain.createdBy.surname}` : 'Unknown',
+      'Created At': new Date(domain.createdAt).toLocaleDateString(),
+      'Updated At': new Date(domain.updatedAt).toLocaleDateString()
+    }));
+
+    const csvContent = [
+      Object.keys(csvData[0]).join(','),
+      ...csvData.map(row => Object.values(row).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `whitelisted-domains-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleSort = (field: 'domain' | 'createdAt' | 'createdBy') => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -57,15 +95,70 @@ const DomainList: React.FC = () => {
   }
 
   const domains = data?.domainAllowlists || [];
+  
+  // Filter domains based on search query
+  const filteredDomains = domains.filter((domain: DomainAllowlist) => {
+    if (!searchQuery.trim()) return true;
+    
+    const searchTerm = searchQuery.toLowerCase();
+    const domainName = domain.domain.toLowerCase();
+    const createdBy = domain.createdBy ? 
+      `${domain.createdBy.givenName} ${domain.createdBy.surname}`.toLowerCase() : '';
+    
+    return domainName.includes(searchTerm) || createdBy.includes(searchTerm);
+  });
+
+  // Sort filtered domains
+  const filteredAndSortedDomains = [...filteredDomains].sort((a, b) => {
+    let aValue: string | number;
+    let bValue: string | number;
+
+    switch (sortField) {
+      case 'domain':
+        aValue = a.domain.toLowerCase();
+        bValue = b.domain.toLowerCase();
+        break;
+      case 'createdAt':
+        aValue = new Date(a.createdAt).getTime();
+        bValue = new Date(b.createdAt).getTime();
+        break;
+      case 'createdBy':
+        aValue = a.createdBy ? `${a.createdBy.givenName} ${a.createdBy.surname}`.toLowerCase() : '';
+        bValue = b.createdBy ? `${b.createdBy.givenName} ${b.createdBy.surname}`.toLowerCase() : '';
+        break;
+      default:
+        return 0;
+    }
+
+    if (sortDirection === 'asc') {
+      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    } else {
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+    }
+  });
+
+  const sortOptions = [
+    { value: 'domain', label: 'Domain Name' },
+    { value: 'createdAt', label: 'Created Date' },
+    { value: 'createdBy', label: 'Created By' }
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Whitelist Domains</h1>
-          <p className="text-gray-600 mt-1">
-            Manage domains that are allowed to access your workspace
-          </p>
+          <div className="flex items-center space-x-4 mt-1">
+            <p className="text-gray-600">
+              Manage domains that are allowed to access your workspace
+            </p>
+            <div className="flex items-center space-x-2 bg-blue-50 px-3 py-1 rounded-full">
+              <Globe className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-900">
+                {domains.length} {domains.length === 1 ? 'Company' : 'Companies'} Whitelisted
+              </span>
+            </div>
+          </div>
         </div>
         <Button
           onClick={() => setIsCreateModalOpen(true)}
@@ -75,19 +168,71 @@ const DomainList: React.FC = () => {
         </Button>
       </div>
 
-      {domains.length === 0 ? (
+      {/* Search, Sort, and Export Controls */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+          <div className="flex-1">
+            <Input
+              label="Search Domains"
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search by domain name or creator..."
+            />
+          </div>
+          
+          <div className="flex items-end space-x-3">
+            <Select
+              label="Sort By"
+              value={sortField}
+              onChange={(value) => setSortField(value as 'domain' | 'createdAt' | 'createdBy')}
+              options={sortOptions}
+              className="min-w-[140px]"
+            />
+            
+            <Button
+              variant="secondary"
+              onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+              className="px-3"
+            >
+              <ArrowUpDown className="w-4 h-4" />
+              {sortDirection === 'asc' ? 'A-Z' : 'Z-A'}
+            </Button>
+            
+            <Button
+              variant="secondary"
+              onClick={exportToCSV}
+              icon={Download}
+              disabled={filteredAndSortedDomains.length === 0}
+            >
+              Export CSV
+            </Button>
+          </div>
+        </div>
+        
+        {searchQuery && (
+          <div className="mt-3 text-sm text-gray-600">
+            Showing {filteredAndSortedDomains.length} of {domains.length} domains
+          </div>
+        )}
+      </div>
+
+      {filteredAndSortedDomains.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
           <Globe className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No domains added</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            {searchQuery ? 'No matching domains found' : 'No domains added'}
+          </h3>
           <p className="text-gray-600 mb-6">
-            Start by adding your first allowed domain to the whitelist
+            {searchQuery ? 'Try adjusting your search terms' : 'Start by adding your first allowed domain to the whitelist'}
           </p>
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            icon={Plus}
-          >
-            Add Domain
-          </Button>
+          {!searchQuery && (
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              icon={Plus}
+            >
+              Add Domain
+            </Button>
+          )}
         </div>
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -96,13 +241,31 @@ const DomainList: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Domain
+                    <button
+                      onClick={() => handleSort('domain')}
+                      className="flex items-center space-x-1 hover:text-gray-700"
+                    >
+                      <span>Domain</span>
+                      <ArrowUpDown className="w-3 h-3" />
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created By
+                    <button
+                      onClick={() => handleSort('createdBy')}
+                      className="flex items-center space-x-1 hover:text-gray-700"
+                    >
+                      <span>Created By</span>
+                      <ArrowUpDown className="w-3 h-3" />
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created At
+                    <button
+                      onClick={() => handleSort('createdAt')}
+                      className="flex items-center space-x-1 hover:text-gray-700"
+                    >
+                      <span>Created At</span>
+                      <ArrowUpDown className="w-3 h-3" />
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -110,7 +273,7 @@ const DomainList: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {domains.map((domain: DomainAllowlist) => (
+                {filteredAndSortedDomains.map((domain: DomainAllowlist) => (
                   <tr key={domain.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
