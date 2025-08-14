@@ -223,6 +223,7 @@ const WorkspacePreferences: React.FC = () => {
                                     defaultValue={formatValue(value)}
                                     className="px-3 py-1 border border-gray-300 rounded text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[300px]"
                                     rows={1}
+                                    data-key={key}
                                     onKeyDown={(e) => {
                                       if (e.key === 'Escape') {
                                         setEditingKey(null);
