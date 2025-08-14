@@ -582,8 +582,9 @@ const UserList: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredAndSortedUsers.map((user: UserType) => (
+                  {filteredAndSortedUsers.map((user: UserType) => {
                     const displayName = getDisplayName(user);
+                    return (
                     <tr key={user.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -653,7 +654,8 @@ const UserList: React.FC = () => {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
