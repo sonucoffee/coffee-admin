@@ -93,3 +93,13 @@ export interface UserSearchFilter {
   search?: string;
 
 }
+
+export interface UpdateWorkspacePreferencesInput {
+  workspaceId: string;
+  revenueGpt: RevenueGptPreferencesInput;
+  preferences?: string;
+}
+
+export interface RevenueGptPreferencesInput {
+  [key: string]: any;
+}
