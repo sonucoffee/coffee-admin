@@ -26,7 +26,7 @@ const Button: React.FC<ButtonProps> = ({
   
   const variantClasses = {
     primary: 'text-white focus:ring-gray-400',
-    secondary: 'text-gray-200 border border-gray-500 hover:bg-opacity-80 focus:ring-gray-400',
+    secondary: 'border border-gray-300 hover:bg-gray-50 focus:ring-gray-400',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
   };
   
@@ -42,6 +42,11 @@ const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       disabled={disabled}
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      style={{
+        backgroundColor: variant === 'primary' ? 'rgba(51, 51, 51, 1)' : undefined,
+        color: variant === 'secondary' ? 'rgba(51, 51, 51, 0.8)' : undefined,
+        ...((variant === 'primary' || variant === 'secondary') && { ':hover': { backgroundColor: variant === 'primary' ? 'rgba(51, 51, 51, 0.9)' : 'rgba(51, 51, 51, 0.05)' } })
+      }}
     >
       {Icon && <Icon className="w-4 h-4 mr-2" />}
       {children}

@@ -41,12 +41,13 @@ const Select: React.FC<SelectProps> = ({
         onChange={(e) => onChange(e.target.value)}
         required={required}
         disabled={disabled}
-        className={`block w-full px-3 py-2 border border-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-gray-400 focus:border-gray-400 sm:text-sm text-gray-100 ${
-          error ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : ''
+        className={`block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 sm:text-sm ${
+          error ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'focus:ring-gray-500 focus:border-gray-500'
         } ${disabled ? 'cursor-not-allowed' : ''}`}
         style={{ 
-          backgroundColor: 'rgba(85, 85, 85, 1)',
-          ...(disabled && { backgroundColor: 'rgba(68, 68, 68, 1)' })
+          backgroundColor: 'white',
+          color: 'rgba(51, 51, 51, 1)',
+          ...(disabled && { backgroundColor: 'rgba(51, 51, 51, 0.05)' })
         }}
       >
         {placeholder && (

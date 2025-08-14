@@ -38,9 +38,9 @@ const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="w-64 min-h-screen flex flex-col" style={{ backgroundColor: 'rgba(51, 51, 51, 1)' }}>
+    <aside className="w-64 min-h-screen flex flex-col bg-white border-r border-gray-200 shadow-sm">
       {/* User Profile Section */}
-      <div className="p-6 border-b border-gray-700">
+      <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3">
           <div className="relative">
             {user?.picture ? (
@@ -50,17 +50,17 @@ const Sidebar: React.FC = () => {
                 className="w-10 h-10 rounded-full"
               />
             ) : (
-              <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center">
-                <Users className="w-5 h-5 text-gray-300" />
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(51, 51, 51, 0.1)' }}>
+                <Users className="w-5 h-5" style={{ color: 'rgba(51, 51, 51, 1)' }} />
               </div>
             )}
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-900"></div>
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-100 truncate">
+            <p className="text-sm font-medium truncate" style={{ color: 'rgba(51, 51, 51, 1)' }}>
               {user?.name || 'Admin User'}
             </p>
-            <p className="text-xs text-gray-300">Welcome</p>
+            <p className="text-xs" style={{ color: 'rgba(51, 51, 51, 0.7)' }}>Welcome</p>
           </div>
         </div>
       </div>
@@ -68,12 +68,16 @@ const Sidebar: React.FC = () => {
       {/* Search Bar */}
       <div className="p-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-300" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(51, 51, 51, 0.5)' }} />
           <input
             type="text"
             placeholder="Type to search..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent text-sm"
-            style={{ backgroundColor: 'rgba(68, 68, 68, 1)' }}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent text-sm"
+            style={{ 
+              backgroundColor: 'rgba(51, 51, 51, 0.05)',
+              color: 'rgba(51, 51, 51, 1)',
+              focusRingColor: 'rgba(51, 51, 51, 0.3)'
+            }}
           />
         </div>
       </div>
@@ -81,7 +85,7 @@ const Sidebar: React.FC = () => {
       {/* Navigation Menu */}
       <div className="flex-1 px-4">
         <div className="mb-4">
-          <p className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-3">
+          <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'rgba(51, 51, 51, 0.6)' }}>
             Admin Menu
           </p>
         </div>
@@ -96,26 +100,29 @@ const Sidebar: React.FC = () => {
               className={({ isActive }) =>
                 `group flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 ${
                   isActive
-                    ? 'text-white shadow-lg'
-                    : 'text-gray-200 hover:text-white'
+                    ? 'shadow-lg'
+                    : 'hover:bg-gray-50'
                 }`
               }
               style={({ isActive }) => ({
-                backgroundColor: isActive ? 'rgba(68, 68, 68, 1)' : 'transparent'
+                backgroundColor: isActive ? 'rgba(51, 51, 51, 0.1)' : 'transparent',
+                color: isActive ? 'rgba(51, 51, 51, 1)' : 'rgba(51, 51, 51, 0.8)'
               })}
               onMouseEnter={(e) => {
-                if (!e.currentTarget.classList.contains('bg-gray-600')) {
-                  e.currentTarget.style.backgroundColor = 'rgba(68, 68, 68, 0.5)';
+                const isActive = e.currentTarget.getAttribute('aria-current') === 'page';
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = 'rgba(51, 51, 51, 0.05)';
                 }
               }}
               onMouseLeave={(e) => {
-                if (!e.currentTarget.classList.contains('bg-gray-600')) {
+                const isActive = e.currentTarget.getAttribute('aria-current') === 'page';
+                if (!isActive) {
                   e.currentTarget.style.backgroundColor = 'transparent';
                 }
               }}
             >
               <div className="flex items-center space-x-3">
-                <Icon className="w-5 h-5 flex-shrink-0" />
+                <Icon className="w-5 h-5 flex-shrink-0" style={{ color: 'inherit' }} />
                 <div>
                   <div className="text-sm font-medium">{item.label}</div>
                 </div>
@@ -132,15 +139,15 @@ const Sidebar: React.FC = () => {
       </div>
 
       {/* Category Section */}
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 border-t border-gray-200">
         <div className="mb-3">
-          <p className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
+          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(51, 51, 51, 0.6)' }}>
             Category
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(68, 68, 68, 1)' }}></div>
-          <span className="text-sm text-gray-200">#Admin</span>
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(51, 51, 51, 1)' }}></div>
+          <span className="text-sm" style={{ color: 'rgba(51, 51, 51, 0.8)' }}>#Admin</span>
         </div>
       </div>
     </aside>

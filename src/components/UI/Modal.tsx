@@ -34,12 +34,13 @@ const Modal: React.FC<ModalProps> = ({
         />
         
         <div className={`inline-block w-full ${maxWidthClasses[maxWidth]} p-6 my-8 overflow-hidden text-left align-middle transition-all transform shadow-xl rounded-lg border border-gray-600`}
-             style={{ backgroundColor: 'rgba(68, 68, 68, 1)' }}>
+        <div className={`inline-block w-full ${maxWidthClasses[maxWidth]} p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg border border-gray-200`}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-100">{title}</h3>
+            <h3 className="text-lg font-medium" style={{ color: 'rgba(51, 51, 51, 1)' }}>{title}</h3>
             <button
               onClick={onClose}
-              className="text-gray-300 hover:text-gray-100 transition-colors"
+              className="transition-colors hover:bg-gray-100 p-1 rounded"
+              style={{ color: 'rgba(51, 51, 51, 0.7)' }}
             >
               <X className="w-5 h-5" />
             </button>
