@@ -146,67 +146,67 @@ const DomainList: React.FC = () => {
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="rounded-xl shadow-sm border border-gray-600 p-6" style={{ backgroundColor: 'rgba(68, 68, 68, 1)' }}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Domains</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{domains.length}</p>
-              <p className="text-sm text-green-600 mt-1">Active whitelist</p>
+              <p className="text-sm font-medium text-gray-300">Total Domains</p>
+              <p className="text-3xl font-bold text-gray-100 mt-2">{domains.length}</p>
+              <p className="text-sm text-green-400 mt-1">Active whitelist</p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Globe className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(85, 85, 85, 1)' }}>
+              <Globe className="w-6 h-6 text-gray-300" />
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="rounded-xl shadow-sm border border-gray-600 p-6" style={{ backgroundColor: 'rgba(68, 68, 68, 1)' }}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Recent Additions</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">
+              <p className="text-sm font-medium text-gray-300">Recent Additions</p>
+              <p className="text-3xl font-bold text-gray-100 mt-2">
                 {domains.filter((d: DomainAllowlist) => {
                   const weekAgo = new Date();
                   weekAgo.setDate(weekAgo.getDate() - 7);
                   return new Date(d.createdAt) > weekAgo;
                 }).length}
               </p>
-              <p className="text-sm text-blue-600 mt-1">This week</p>
+              <p className="text-sm text-blue-400 mt-1">This week</p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Plus className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(85, 85, 85, 1)' }}>
+              <Plus className="w-6 h-6 text-gray-300" />
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="rounded-xl shadow-sm border border-gray-600 p-6" style={{ backgroundColor: 'rgba(68, 68, 68, 1)' }}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Security Status</p>
-              <p className="text-3xl font-bold text-green-600 mt-2">Active</p>
-              <p className="text-sm text-gray-500 mt-1">All systems operational</p>
+              <p className="text-sm font-medium text-gray-300">Security Status</p>
+              <p className="text-3xl font-bold text-green-400 mt-2">Active</p>
+              <p className="text-sm text-gray-400 mt-1">All systems operational</p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Shield className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(85, 85, 85, 1)' }}>
+              <Shield className="w-6 h-6 text-gray-300" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content Card */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+      <div className="rounded-xl shadow-sm border border-gray-600" style={{ backgroundColor: 'rgba(68, 68, 68, 1)' }}>
         {/* Card Header */}
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-600">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Whitelist Domains</h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <h2 className="text-xl font-semibold text-gray-100">Whitelist Domains</h2>
+              <p className="text-sm text-gray-300 mt-1">
                 Manage domains that are allowed to access your workspace
               </p>
             </div>
             <Button
               onClick={() => setIsCreateModalOpen(true)}
               icon={Plus}
-              className="bg-blue-600 hover:bg-blue-700"
+              style={{ backgroundColor: 'rgba(85, 85, 85, 1)', border: '1px solid rgba(102, 102, 102, 1)' }}
             >
               Add Domain
             </Button>
@@ -214,14 +214,13 @@ const DomainList: React.FC = () => {
         </div>
         
         {/* Search and Controls */}
-        <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-600" style={{ backgroundColor: 'rgba(85, 85, 85, 1)' }}>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
             <div className="flex-1">
               <Input
                 value={searchQuery}
                 onChange={setSearchQuery}
                 placeholder="Search by domain name or creator..."
-                className="border-gray-300"
               />
             </div>
             
@@ -254,7 +253,7 @@ const DomainList: React.FC = () => {
           </div>
           
           {searchQuery && (
-            <div className="mt-3 text-sm text-gray-600">
+            <div className="mt-3 text-sm text-gray-300">
               Showing {filteredAndSortedDomains.length} of {domains.length} domains
             </div>
           )}
@@ -263,11 +262,11 @@ const DomainList: React.FC = () => {
         {/* Table Content */}
         {filteredAndSortedDomains.length === 0 ? (
           <div className="text-center py-12">
-            <Globe className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <Globe className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-100 mb-2">
               {searchQuery ? 'No matching domains found' : 'No domains added'}
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-300 mb-6">
               {searchQuery ? 'Try adjusting your search terms' : 'Start by adding your first allowed domain to the whitelist'}
             </p>
             {!searchQuery && (
@@ -282,48 +281,50 @@ const DomainList: React.FC = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead style={{ backgroundColor: 'rgba(85, 85, 85, 1)' }}>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     <button
                       onClick={() => handleSort('domain')}
-                      className="flex items-center space-x-1 hover:text-gray-700"
+                      className="flex items-center space-x-1 hover:text-gray-100"
                     >
                       <span>Domain</span>
                       <ArrowUpDown className="w-3 h-3" />
                     </button>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     <button
                       onClick={() => handleSort('createdBy')}
-                      className="flex items-center space-x-1 hover:text-gray-700"
+                      className="flex items-center space-x-1 hover:text-gray-100"
                     >
                       <span>Created By</span>
                       <ArrowUpDown className="w-3 h-3" />
                     </button>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     <button
                       onClick={() => handleSort('createdAt')}
-                      className="flex items-center space-x-1 hover:text-gray-700"
+                      className="flex items-center space-x-1 hover:text-gray-100"
                     >
                       <span>Created At</span>
                       <ArrowUpDown className="w-3 h-3" />
                     </button>
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-600" style={{ backgroundColor: 'rgba(68, 68, 68, 1)' }}>
                 {filteredAndSortedDomains.map((domain: DomainAllowlist) => (
-                  <tr key={domain.id} className="hover:bg-gray-50">
+                  <tr key={domain.id} className="hover:bg-opacity-80" style={{ ':hover': { backgroundColor: 'rgba(85, 85, 85, 0.8)' } }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(85, 85, 85, 0.8)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <Globe className="w-5 h-5 text-gray-400 mr-3" />
+                        <Globe className="w-5 h-5 text-gray-300 mr-3" />
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-gray-100">
                             {domain.domain}
                           </div>
                         </div>
@@ -331,8 +332,8 @@ const DomainList: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <User className="w-4 h-4 text-gray-400 mr-2" />
-                        <div className="text-sm text-gray-900">
+                        <User className="w-4 h-4 text-gray-300 mr-2" />
+                        <div className="text-sm text-gray-200">
                           {domain.createdBy ? 
                             `${domain.createdBy.givenName} ${domain.createdBy.surname}` : 
                             'Unknown'
@@ -342,8 +343,8 @@ const DomainList: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-                        <div className="text-sm text-gray-500">
+                        <Calendar className="w-4 h-4 text-gray-300 mr-2" />
+                        <div className="text-sm text-gray-300">
                           {new Date(domain.createdAt).toLocaleDateString()}
                         </div>
                       </div>
