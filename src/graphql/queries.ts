@@ -96,3 +96,15 @@ export const SEARCH_USERS = gql`
     }
   }
 `;
+
+export const GET_WORKSPACE_PREFERENCES = gql`
+  query GetWorkspacePreferences($workspaceId: ID!) {
+    workspacePreferences(workspaceId: $workspaceId) {
+      id
+      workspaceId
+      preferences
+      createTs
+      updateTs
+    }
+  }
+`;
