@@ -100,11 +100,9 @@ export const CREATE_WORKSPACE = gql`
 `;
 
 export const UPDATE_WORKSPACE_PREFERENCES = gql`
-  mutation updatePreferences($input: UpdateWorkspacePreferencesInput!) {
+  mutation UpdateWorkspacePreferences($input: UpdateWorkspacePreferencesInput!) {
     updatePreferences(input: $input) {
       preferences {
-        ...
-      }
     }
   }
 `;
