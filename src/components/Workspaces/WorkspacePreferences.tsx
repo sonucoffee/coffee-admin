@@ -205,66 +205,49 @@ const WorkspacePreferences: React.FC = () => {
     setPreferences(prev => ({
       ...prev,
       [key]: parsedValue
-                      <td className="px-6 py-4 whitespace-nowrap">
+    }));
     setEditingKey(null);
   };
 
   // Delete preference
   const handleDeletePreference = (key: string) => {
     setPreferences(prev => {
-                            <div className="flex items-center space-x-2">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {typeof value}
-                              </span>
-                              <span className="text-gray-500">→</span>
-                              {editingKey === key ? (
-                                <div className="flex items-center space-x-2">
-                                  <textarea
-                                    defaultValue={formatValue(value)}
-                                    className="px-3 py-1 border border-gray-300 rounded text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[300px]"
-                                    rows={1}
-                                    data-key={key}
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Escape') {
-                                        setEditingKey(null);
-                                      }
-                                      if (e.key === 'Enter' && e.ctrlKey) {
-                                        handleUpdatePreference(key, e.currentTarget.value);
-                                      }
-                                    }}
-                                    autoFocus
-                                  />
-                                  <Button
-                                    size="sm"
-                                    variant="secondary"
-                                    onClick={() => setEditingKey(null)}
-                                    className="px-2"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => {
-                                      const textarea = document.querySelector(`textarea[data-key="${key}"]`) as HTMLTextAreaElement;
-                                      if (textarea) {
-                                        handleUpdatePreference(key, textarea.value);
-                                      }
-                                    }}
-                                    className="px-2"
-                                  >
-                                    <Save className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              ) : (
-                                <div className="text-sm text-gray-800 font-mono max-w-md truncate" title={formatValue(value)}>
-                                  {formatValue(value)}
-                                </div>
-                              )}
+      const newPrefs = { ...prev };
+      delete newPrefs[key];
+      return newPrefs;
+    });
+  };
+
+  // Format value for display
+  const formatValue = (value: any): string => {
+    if (typeof value === 'string') {
+      return value;
+    }
+    return JSON.stringify(value, null, 2);
+  };
+
+  // Show workspace selection if no workspace is selected
+  if (showWorkspaceTable) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Workspace Preferences</h1>
+            <p className="text-gray-600 mt-1">Select a workspace to manage its preferences</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Available Workspaces</h3>
             <p className="text-sm text-gray-600 mt-1">
-                        </div>
+              Choose a workspace to configure its preferences and settings
+            </p>
+          </div>
+
+          {workspacesLoading ? (
             <div className="flex items-center justify-center h-96">
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+              <LoadingSpinner message="Loading workspaces..." />
             </div>
           ) : workspaceState.workspaces.length === 0 ? (
             <div className="text-center py-12 h-96 flex flex-col items-center justify-center">
