@@ -20,11 +20,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 p-6">
+    <div className="min-h-screen bg-gray-100 flex">
+      <Sidebar />
+      <div className="flex-1 flex flex-col">
+        <Header />
+        <main className="flex-1 p-6 bg-gray-100 overflow-auto">
           {children}
         </main>
       </div>

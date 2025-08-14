@@ -143,98 +143,143 @@ const DomainList: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Whitelist Domains</h1>
-          <div className="flex items-center space-x-4 mt-1">
-            <p className="text-gray-600">
-              Manage domains that are allowed to access your workspace
-            </p>
-            <div className="flex items-center space-x-2 bg-blue-50 px-3 py-1 rounded-full">
-              <Globe className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-900">
-                {domains.length} {domains.length === 1 ? 'Company' : 'Companies'} Whitelisted
-              </span>
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Domains</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">{domains.length}</p>
+              <p className="text-sm text-green-600 mt-1">Active whitelist</p>
+            </div>
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Globe className="w-6 h-6 text-blue-600" />
             </div>
           </div>
         </div>
-        <Button
-          onClick={() => setIsCreateModalOpen(true)}
-          icon={Plus}
-        >
-          Add Domain
-        </Button>
+        
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Recent Additions</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">
+                {domains.filter((d: DomainAllowlist) => {
+                  const weekAgo = new Date();
+                  weekAgo.setDate(weekAgo.getDate() - 7);
+                  return new Date(d.createdAt) > weekAgo;
+                }).length}
+              </p>
+              <p className="text-sm text-blue-600 mt-1">This week</p>
+            </div>
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <Plus className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Security Status</p>
+              <p className="text-3xl font-bold text-green-600 mt-2">Active</p>
+              <p className="text-sm text-gray-500 mt-1">All systems operational</p>
+            </div>
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <Shield className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Search, Sort, and Export Controls */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-          <div className="flex-1">
-            <Input
-              label="Search Domains"
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search by domain name or creator..."
-            />
-          </div>
-          
-          <div className="flex items-end space-x-3">
-            <Select
-              label="Sort By"
-              value={sortField}
-              onChange={(value) => setSortField(value as 'domain' | 'createdAt' | 'createdBy')}
-              options={sortOptions}
-              className="min-w-[140px]"
-            />
-            
+      {/* Main Content Card */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        {/* Card Header */}
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Whitelist Domains</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Manage domains that are allowed to access your workspace
+              </p>
+            </div>
             <Button
-              variant="secondary"
-              onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-              className="px-3"
+              onClick={() => setIsCreateModalOpen(true)}
+              icon={Plus}
+              className="bg-blue-600 hover:bg-blue-700"
             >
-              <ArrowUpDown className="w-4 h-4" />
-              {sortDirection === 'asc' ? 'A-Z' : 'Z-A'}
-            </Button>
-            
-            <Button
-              variant="secondary"
-              onClick={exportToCSV}
-              icon={Download}
-              disabled={filteredAndSortedDomains.length === 0}
-            >
-              Export CSV
+              Add Domain
             </Button>
           </div>
         </div>
         
-        {searchQuery && (
-          <div className="mt-3 text-sm text-gray-600">
-            Showing {filteredAndSortedDomains.length} of {domains.length} domains
+        {/* Search and Controls */}
+        <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+            <div className="flex-1">
+              <Input
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search by domain name or creator..."
+                className="border-gray-300"
+              />
+            </div>
+            
+            <div className="flex items-end space-x-3">
+              <Select
+                value={sortField}
+                onChange={(value) => setSortField(value as 'domain' | 'createdAt' | 'createdBy')}
+                options={sortOptions}
+                className="min-w-[140px]"
+              />
+              
+              <Button
+                variant="secondary"
+                onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                className="px-3"
+              >
+                <ArrowUpDown className="w-4 h-4" />
+                {sortDirection === 'asc' ? 'A-Z' : 'Z-A'}
+              </Button>
+              
+              <Button
+                variant="secondary"
+                onClick={exportToCSV}
+                icon={Download}
+                disabled={filteredAndSortedDomains.length === 0}
+              >
+                Export CSV
+              </Button>
+            </div>
           </div>
-        )}
-      </div>
-
-      {filteredAndSortedDomains.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-          <Globe className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {searchQuery ? 'No matching domains found' : 'No domains added'}
-          </h3>
-          <p className="text-gray-600 mb-6">
-            {searchQuery ? 'Try adjusting your search terms' : 'Start by adding your first allowed domain to the whitelist'}
-          </p>
-          {!searchQuery && (
-            <Button
-              onClick={() => setIsCreateModalOpen(true)}
-              icon={Plus}
-            >
-              Add Domain
-            </Button>
+          
+          {searchQuery && (
+            <div className="mt-3 text-sm text-gray-600">
+              Showing {filteredAndSortedDomains.length} of {domains.length} domains
+            </div>
           )}
         </div>
-      ) : (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+
+        {/* Table Content */}
+        {filteredAndSortedDomains.length === 0 ? (
+          <div className="text-center py-12">
+            <Globe className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {searchQuery ? 'No matching domains found' : 'No domains added'}
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {searchQuery ? 'Try adjusting your search terms' : 'Start by adding your first allowed domain to the whitelist'}
+            </p>
+            {!searchQuery && (
+              <Button
+                onClick={() => setIsCreateModalOpen(true)}
+                icon={Plus}
+              >
+                Add Domain
+              </Button>
+            )}
+          </div>
+        ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -280,6 +325,61 @@ const DomainList: React.FC = () => {
                         <div>
                           <div className="text-sm font-medium text-gray-900">
                             {domain.domain}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <User className="w-4 h-4 text-gray-400 mr-2" />
+                        <div className="text-sm text-gray-900">
+                          {domain.createdBy ? 
+                            `${domain.createdBy.givenName} ${domain.createdBy.surname}` : 
+                            'Unknown'
+                          }
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <Calendar className="w-4 h-4 text-gray-400 mr-2" />
+                        <div className="text-sm text-gray-500">
+                          {new Date(domain.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end space-x-2">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          icon={Edit2}
+                          onClick={() => setEditingDomain(domain)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          icon={Trash2}
+                          onClick={() => setDeletingDomain(domain)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default DomainList;
                           </div>
                         </div>
                       </div>
