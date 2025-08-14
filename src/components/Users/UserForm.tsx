@@ -31,6 +31,7 @@ const UserForm: React.FC<UserFormProps> = ({
 
   const roleOptions = [
     { value: 'owner', label: 'Owner' },
+    { value: 'admin', label: 'Admin' },
     { value: 'user', label: 'User' }
   ];
 
@@ -157,6 +158,7 @@ const UserForm: React.FC<UserFormProps> = ({
         <p className="mb-2">Role permissions:</p>
         <ul className="list-disc list-inside space-y-1 text-xs">
           <li><strong>Owner:</strong> Full access to all features and workspace management</li>
+          <li><strong>Admin:</strong> Administrative access to workspace features</li>
           <li><strong>User:</strong> Standard access to workspace features</li>
         </ul>
       </div>
