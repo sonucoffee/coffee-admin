@@ -21,11 +21,11 @@ const Header: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-3">
             <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg">
-              {/* <Coffee className="w-6 h-6 text-white" /> */}
               <img
-                  src={'coffee-logo-bean-64.png'}
-                  className="w-8 h-8 rounded-full"
-                />
+                src="/coffee-logo-bean-64.png"
+                alt="Coffee Logo"
+                className="w-8 h-8 rounded-full"
+              />
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">The Coffee Bar</h1>

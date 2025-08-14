@@ -413,114 +413,131 @@ const WorkspacePreferences: React.FC = () => {
           </Button>
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Workspace Preferences</h3>
-            <p className="text-sm text-gray-600 mt-1">
-              Manage configuration settings for this workspace
-            </p>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Preference Key
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Value
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {Object.entries(preferences).map(([key, value]) => (
-                  <tr key={key} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <Settings className="w-5 h-5 text-gray-400 mr-3" />
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{key}</div>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                            {typeof value}
-                          </span>
-                        </div>
+        <div className="space-y-4">
+          {Object.entries(preferences).map(([key, value]) => (
+            <div key={key} className="bg-white rounded-lg border border-gray-200 shadow-sm">
+              {/* Preference Header */}
+              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg">
+                      <Settings className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">{key}</h3>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {typeof value}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {typeof value === 'object' ? `${Object.keys(value).length} properties` : 'Simple value'}
+                        </span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {editingKey === key ? (
-                        <div className="flex items-center space-x-2">
-                          <textarea
-                            defaultValue={formatValue(value)}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            rows={typeof value === 'object' ? 3 : 1}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Escape') {
-                                setEditingKey(null);
-                              }
-                              if (e.key === 'Enter' && e.ctrlKey) {
-                                handleUpdatePreference(key, e.currentTarget.value);
-                              }
-                            }}
-                            autoFocus
-                          />
-                          <div className="flex space-x-1">
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => setEditingKey(null)}
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => {
-                                const textarea = document.querySelector(`textarea`) as HTMLTextAreaElement;
-                                if (textarea) {
-                                  handleUpdatePreference(key, textarea.value);
-                                }
-                              }}
-                            >
-                              <Save className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-sm text-gray-900 font-mono max-w-md truncate" title={formatValue(value)}>
+                    </div>
+                  </div>
+                  
+                  {editingKey !== key && (
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        icon={Edit2}
+                        onClick={() => setEditingKey(key)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        icon={Trash2}
+                        onClick={() => handleDeletePreference(key)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Preference Content */}
+              <div className="p-6">
+                {editingKey === key ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Edit Value for "{key}"
+                      </label>
+                      <textarea
+                        defaultValue={formatValue(value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm font-mono bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        rows={typeof value === 'object' ? 8 : 4}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Escape') {
+                            setEditingKey(null);
+                          }
+                          if (e.key === 'Enter' && e.ctrlKey) {
+                            handleUpdatePreference(key, e.currentTarget.value);
+                          }
+                        }}
+                        autoFocus
+                        placeholder="Enter your preference value..."
+                      />
+                      <div className="mt-2 text-xs text-gray-500">
+                        💡 Tip: Use Ctrl+Enter to save quickly, or Escape to cancel
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                      <div className="text-sm text-gray-600">
+                        Make sure your JSON is valid for object/array values
+                      </div>
+                      <div className="flex space-x-3">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setEditingKey(null)}
+                          icon={X}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            const textarea = document.querySelector(`textarea`) as HTMLTextAreaElement;
+                            if (textarea) {
+                              handleUpdatePreference(key, textarea.value);
+                            }
+                          }}
+                          icon={Save}
+                        >
+                          Save Changes
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Current Value:
+                      </label>
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <pre className="text-sm text-gray-800 font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed">
                           {formatValue(value)}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      {editingKey !== key && (
-                        <div className="flex items-center justify-end space-x-2">
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            icon={Edit2}
-                            onClick={() => setEditingKey(key)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            icon={Trash2}
-                            onClick={() => handleDeletePreference(key)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        </pre>
+                      </div>
+                    </div>
+                    
+                    {typeof value === 'object' && (
+                      <div className="text-xs text-gray-500 bg-blue-50 border border-blue-200 rounded p-2">
+                        📋 This is a JSON object with {Object.keys(value).length} properties
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
