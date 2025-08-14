@@ -10,6 +10,33 @@ import Input from '../UI/Input';
 import Select from '../UI/Select';
 import UserForm from './UserForm';
 
+// Helper function to extract name from email
+const extractNameFromEmail = (email: string): string => {
+  const localPart = email.split('@')[0];
+  // Replace common separators with spaces and capitalize
+  return localPart
+    .replace(/[._-]/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
+// Helper function to get display name
+const getDisplayName = (user: UserType): { name: string; isExtracted: boolean } => {
+  const hasName = user.givenName?.trim() && user.surname?.trim();
+  
+  if (hasName) {
+    return {
+      name: `${user.givenName} ${user.surname}`,
+      isExtracted: false
+    };
+  }
+  
+  return {
+    name: extractNameFromEmail(user.email),
+    isExtracted: true
+  };
+};
 const UserList: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserType | null>(null);
@@ -168,7 +195,7 @@ const UserList: React.FC = () => {
 
   const exportUsersToCSV = () => {
     const csvData = filteredAndSortedUsers.map(user => ({
-      Name: `${user.givenName} ${user.surname}`,
+      Name: getDisplayName(user).name,
       Email: user.email,
       Role: user.role || 'User',
       Status: user.isOnboarded ? 'Active' : 'Pending',
@@ -208,7 +235,7 @@ const UserList: React.FC = () => {
     if (!userSearchQuery.trim()) return true;
     
     const searchTerm = userSearchQuery.toLowerCase();
-    const fullName = `${user.givenName} ${user.surname}`.toLowerCase();
+    const fullName = getDisplayName(user).name.toLowerCase();
     const email = user.email.toLowerCase();
     const role = (user.role || '').toLowerCase();
     
@@ -224,8 +251,8 @@ const UserList: React.FC = () => {
 
     switch (userSortField) {
       case 'name':
-        aValue = `${a.givenName} ${a.surname}`.toLowerCase();
-        bValue = `${b.givenName} ${b.surname}`.toLowerCase();
+        aValue = getDisplayName(a).name.toLowerCase();
+        bValue = getDisplayName(b).name.toLowerCase();
         break;
       case 'email':
         aValue = a.email.toLowerCase();
@@ -556,13 +583,14 @@ const UserList: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredAndSortedUsers.map((user: UserType) => (
+                    const displayName = getDisplayName(user);
                     <tr key={user.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           {user.profileImageUrl ? (
                             <img
                               src={user.profileImageUrl}
-                              alt={`${user.givenName} ${user.surname}`}
+                              alt={displayName.name}
                               className="w-10 h-10 rounded-full mr-3"
                             />
                           ) : (
@@ -571,8 +599,16 @@ const UserList: React.FC = () => {
                             </div>
                           )}
                           <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {user.givenName} {user.surname}
+                            <div className="flex items-center space-x-2">
+                              <div className="text-sm font-medium text-gray-900">
+                                {displayName.name}
+                              </div>
+                              {displayName.isExtracted && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                  <Mail className="w-3 h-3 mr-1" />
+                                  from email
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -673,7 +709,7 @@ const UserList: React.FC = () => {
             <p className="text-gray-600">
               Are you sure you want to remove{' '}
               <span className="font-medium text-gray-900">
-                {deletingUser.givenName} {deletingUser.surname}
+                {getDisplayName(deletingUser).name}
               </span>{' '}
               from the workspace? This action cannot be undone.
             </p>
