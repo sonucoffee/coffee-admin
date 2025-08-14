@@ -429,21 +429,6 @@ const UserList: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Owners</p>
-              <p className="text-3xl font-bold text-red-600 mt-2">
-                {users.filter((u: UserType) => u.role === 'owner').length}
-              </p>
-              <p className="text-sm text-red-600 mt-1">Full access</p>
-            </div>
-            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-              <Shield className="w-6 h-6 text-red-600" />
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
               <p className="text-sm font-medium text-gray-600">Active Users</p>
               <p className="text-3xl font-bold text-green-600 mt-2">
                 {users.filter((u: UserType) => u.isOnboarded).length}

@@ -150,7 +150,6 @@ const WorkspacePreferences: React.FC = () => {
         variables: {
           input: {
             workspaceId: selectedWorkspaceId,
-            revenueGpt: revenueGptPrefs,
             preferences: JSON.stringify(preferences)
           }
         }

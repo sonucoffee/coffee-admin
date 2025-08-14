@@ -96,7 +96,6 @@ export interface UserSearchFilter {
 
 export interface UpdateWorkspacePreferencesInput {
   workspaceId: string;
-  revenueGpt: RevenueGptPreferencesInput;
   preferences?: string;
 }
 
