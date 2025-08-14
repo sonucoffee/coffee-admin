@@ -91,3 +91,5 @@ export interface CreateWorkspace {
 
 export interface UserSearchFilter {
   search?: string;
+
+}
