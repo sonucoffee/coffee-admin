@@ -413,73 +413,31 @@ const WorkspacePreferences: React.FC = () => {
           </Button>
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Workspace Preferences</h3>
-            <p className="text-sm text-gray-600 mt-1">
-              Manage key-value pairs for workspace configuration
-            </p>
-          </div>
-          
-          <div className="divide-y divide-gray-200">
-            {Object.entries(preferences).map(([key, value]) => (
-              <div key={key} className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <h4 className="text-sm font-medium text-gray-900">{key}</h4>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                        {typeof value}
-                      </span>
+        <div className="space-y-4">
+          {Object.entries(preferences).map(([key, value]) => (
+            <div key={key} className="bg-white rounded-lg border border-gray-200 shadow-sm">
+              {/* Preference Header */}
+              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg">
+                      <Settings className="w-4 h-4 text-blue-600" />
                     </div>
-                    
-                    {editingKey === key ? (
-                      <div className="space-y-3">
-                        <textarea
-                          defaultValue={formatValue(value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
-                          rows={typeof value === 'object' ? 6 : 3}
-                          onBlur={(e) => handleUpdatePreference(key, e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Escape') {
-                              setEditingKey(null);
-                            }
-                            if (e.key === 'Enter' && e.ctrlKey) {
-                              handleUpdatePreference(key, e.currentTarget.value);
-                            }
-                          }}
-                          autoFocus
-                        />
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              const textarea = document.querySelector(`textarea`) as HTMLTextAreaElement;
-                              if (textarea) {
-                                handleUpdatePreference(key, textarea.value);
-                              }
-                            }}
-                          >
-                            Save
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => setEditingKey(null)}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">{key}</h3>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {typeof value}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {typeof value === 'object' ? `${Object.keys(value).length} properties` : 'Simple value'}
+                        </span>
                       </div>
-                    ) : (
-                      <pre className="text-sm text-gray-600 bg-gray-50 p-3 rounded border overflow-x-auto whitespace-pre-wrap">
-                        {formatValue(value)}
-                      </pre>
-                    )}
+                    </div>
                   </div>
                   
                   {editingKey !== key && (
-                    <div className="flex items-center space-x-2 ml-4">
+                    <div className="flex items-center space-x-2">
                       <Button
                         size="sm"
                         variant="secondary"
@@ -500,8 +458,86 @@ const WorkspacePreferences: React.FC = () => {
                   )}
                 </div>
               </div>
-            ))}
-          </div>
+              
+              {/* Preference Content */}
+              <div className="p-6">
+                {editingKey === key ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Edit Value for "{key}"
+                      </label>
+                      <textarea
+                        defaultValue={formatValue(value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm font-mono bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        rows={typeof value === 'object' ? 8 : 4}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Escape') {
+                            setEditingKey(null);
+                          }
+                          if (e.key === 'Enter' && e.ctrlKey) {
+                            handleUpdatePreference(key, e.currentTarget.value);
+                          }
+                        }}
+                        autoFocus
+                        placeholder="Enter your preference value..."
+                      />
+                      <div className="mt-2 text-xs text-gray-500">
+                        💡 Tip: Use Ctrl+Enter to save quickly, or Escape to cancel
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                      <div className="text-sm text-gray-600">
+                        Make sure your JSON is valid for object/array values
+                      </div>
+                      <div className="flex space-x-3">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setEditingKey(null)}
+                          icon={X}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            const textarea = document.querySelector(`textarea`) as HTMLTextAreaElement;
+                            if (textarea) {
+                              handleUpdatePreference(key, textarea.value);
+                            }
+                          }}
+                          icon={Save}
+                        >
+                          Save Changes
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Current Value:
+                      </label>
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <pre className="text-sm text-gray-800 font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed">
+                          {formatValue(value)}
+                        </pre>
+                      </div>
+                    </div>
+                    
+                    {typeof value === 'object' && (
+                      <div className="text-xs text-gray-500 bg-blue-50 border border-blue-200 rounded p-2">
+                        📋 This is a JSON object with {Object.keys(value).length} properties
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -514,38 +550,67 @@ const WorkspacePreferences: React.FC = () => {
           setNewValue('');
           setError('');
         }}
-        title="Add New Preference"
+        title="Add New Workspace Preference"
+        maxWidth="lg"
       >
-        <div className="space-y-4">
-          <Input
-            label="Key"
-            value={newKey}
-            onChange={setNewKey}
-            placeholder="preference_key"
-            required
-          />
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Value
-            </label>
-            <textarea
-              value={newValue}
-              onChange={(e) => setNewValue(e.target.value)}
-              placeholder='Enter value (JSON objects, strings, numbers, booleans)'
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-              rows={4}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Supports JSON objects, arrays, strings, numbers, and booleans
-            </p>
+        <div className="space-y-6">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start space-x-3">
+              <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg flex-shrink-0">
+                <Plus className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-blue-900">Adding New Preference</h3>
+                <p className="text-sm text-blue-700 mt-1">
+                  Create a new configuration setting for this workspace. Use descriptive keys and valid JSON for complex values.
+                </p>
+              </div>
+            </div>
           </div>
 
+          <div className="grid grid-cols-1 gap-6">
+            <Input
+              label="Preference Key"
+              value={newKey}
+              onChange={setNewKey}
+              placeholder="e.g., api_timeout, feature_flags, user_limits"
+              required
+            />
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Preference Value
+                <span className="text-red-500 ml-1">*</span>
+              </label>
+              <textarea
+                value={newValue}
+                onChange={(e) => setNewValue(e.target.value)}
+                placeholder='Examples:
+"simple string value"
+42
+true
+{"timeout": 5000, "retries": 3}
+["option1", "option2", "option3"]'
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                rows={6}
+              />
+              <div className="mt-2 text-xs text-gray-500">
+                💡 Supports: strings, numbers, booleans, JSON objects, and arrays
+              </div>
+            </div>
+          </div>
+          
+
           {error && (
-            <div className="text-sm text-red-600">{error}</div>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <div className="flex items-center space-x-2">
+                <X className="w-4 h-4 text-red-600" />
+                <span className="text-sm font-medium text-red-800">{error}</span>
+              </div>
+            </div>
           )}
 
-          <div className="flex space-x-3 justify-end pt-4">
+          <div className="flex space-x-3 justify-end pt-6 border-t border-gray-200">
             <Button
               variant="secondary"
               onClick={() => {
@@ -554,11 +619,15 @@ const WorkspacePreferences: React.FC = () => {
                 setNewValue('');
                 setError('');
               }}
+              icon={X}
             >
               Cancel
             </Button>
-            <Button onClick={handleAddPreference}>
-              Add Preference
+            <Button 
+              onClick={handleAddPreference}
+              icon={Plus}
+            >
+              Create Preference
             </Button>
           </div>
         </div>
