@@ -11,8 +11,8 @@ import UnauthorizedPage from './components/Auth/UnauthorizedPage';
 import DomainList from './components/Domains/DomainList';
 import UserList from './components/Users/UserList';
 import CreateWorkspace from './components/Workspaces/CreateWorkspace';
-import WorkspacePreferences from './components/Workspaces/WorkspacePreferences';
 import LoadingSpinner from './components/UI/LoadingSpinner';
+import WorkspacePreferences from './components/Workspaces/WorkspacePreferences';
 
 const AuthorizedApp: React.FC = () => {
   const { data, loading, error, refetch } = useQuery(GET_ME, {

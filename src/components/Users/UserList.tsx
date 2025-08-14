@@ -299,49 +299,6 @@ const UserList: React.FC = () => {
   if (showWorkspaceTable) {
     return (
       <div className="space-y-6 max-w-7xl mx-auto">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Workspaces</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{workspaceState.workspaces.length}</p>
-                <p className="text-sm text-blue-600 mt-1">Available</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Users</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {workspaceState.workspaces.reduce((acc: number, edge: any) => acc + (edge.node.userCount || 0), 0) || '---'}
-                </p>
-                <p className="text-sm text-green-600 mt-1">Across all workspaces</p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Management Status</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">Active</p>
-                <p className="text-sm text-gray-500 mt-1">Ready to manage</p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Shield className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Main Content Card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
@@ -379,8 +336,8 @@ const UserList: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="flex-1 overflow-hidden">
-              <div ref={scrollContainerRef} className="h-96 overflow-y-auto">
+            <div className="overflow-hidden">
+              <div ref={scrollContainerRef} className="max-h-96 overflow-y-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -472,6 +429,21 @@ const UserList: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
+              <p className="text-sm font-medium text-gray-600">Owners</p>
+              <p className="text-3xl font-bold text-red-600 mt-2">
+                {users.filter((u: UserType) => u.role === 'owner').length}
+              </p>
+              <p className="text-sm text-red-600 mt-1">Full access</p>
+            </div>
+            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+              <Shield className="w-6 h-6 text-red-600" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
               <p className="text-sm font-medium text-gray-600">Active Users</p>
               <p className="text-3xl font-bold text-green-600 mt-2">
                 {users.filter((u: UserType) => u.isOnboarded).length}
@@ -495,21 +467,6 @@ const UserList: React.FC = () => {
             </div>
             <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
               <Mail className="w-6 h-6 text-yellow-600" />
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Admins</p>
-              <p className="text-3xl font-bold text-purple-600 mt-2">
-                {users.filter((u: UserType) => u.role === 'owner' || u.role === 'admin').length}
-              </p>
-              <p className="text-sm text-purple-600 mt-1">With admin access</p>
-            </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Shield className="w-6 h-6 text-purple-600" />
             </div>
           </div>
         </div>

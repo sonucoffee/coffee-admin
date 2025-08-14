@@ -54,7 +54,6 @@ const Sidebar: React.FC = () => {
                 <Users className="w-5 h-5" style={{ color: 'rgba(51, 51, 51, 1)' }} />
               </div>
             )}
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate" style={{ color: 'rgba(51, 51, 51, 1)' }}>
@@ -65,31 +64,8 @@ const Sidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(51, 51, 51, 0.5)' }} />
-          <input
-            type="text"
-            placeholder="Type to search..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent text-sm"
-            style={{ 
-              backgroundColor: 'rgba(51, 51, 51, 0.05)',
-              color: 'rgba(51, 51, 51, 1)',
-              focusRingColor: 'rgba(51, 51, 51, 0.3)'
-            }}
-          />
-        </div>
-      </div>
-
       {/* Navigation Menu */}
       <div className="flex-1 px-4">
-        <div className="mb-4">
-          <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'rgba(51, 51, 51, 0.6)' }}>
-            Admin Menu
-          </p>
-        </div>
-        
         <nav className="space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -127,28 +103,10 @@ const Sidebar: React.FC = () => {
                   <div className="text-sm font-medium">{item.label}</div>
                 </div>
               </div>
-              {item.isNew && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500 text-white">
-                  New
-                </span>
-              )}
             </NavLink>
           );
         })}
         </nav>
-      </div>
-
-      {/* Category Section */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="mb-3">
-          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(51, 51, 51, 0.6)' }}>
-            Category
-          </p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(51, 51, 51, 1)' }}></div>
-          <span className="text-sm" style={{ color: 'rgba(51, 51, 51, 0.8)' }}>#Admin</span>
-        </div>
       </div>
     </aside>
   );

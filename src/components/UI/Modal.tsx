@@ -33,7 +33,6 @@ const Modal: React.FC<ModalProps> = ({
           onClick={onClose}
         />
         
-        <div className={`inline-block w-full ${maxWidthClasses[maxWidth]} p-6 my-8 overflow-hidden text-left align-middle transition-all transform shadow-xl rounded-lg border border-gray-600`}
         <div className={`inline-block w-full ${maxWidthClasses[maxWidth]} p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg border border-gray-200`}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium" style={{ color: 'rgba(51, 51, 51, 1)' }}>{title}</h3>
@@ -50,7 +49,6 @@ const Modal: React.FC<ModalProps> = ({
         </div>
       </div>
     </div>
-  )
   );
 };
 

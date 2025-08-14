@@ -158,38 +158,6 @@ const DomainList: React.FC = () => {
             </div>
           </div>
         </div>
-        
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium" style={{ color: 'rgba(51, 51, 51, 0.7)' }}>Recent Additions</p>
-              <p className="text-3xl font-bold mt-2" style={{ color: 'rgba(51, 51, 51, 1)' }}>
-                {domains.filter((d: DomainAllowlist) => {
-                  const weekAgo = new Date();
-                  weekAgo.setDate(weekAgo.getDate() - 7);
-                  return new Date(d.createdAt) > weekAgo;
-                }).length}
-              </p>
-              <p className="text-sm text-blue-600 mt-1">This week</p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Plus className="w-6 h-6 text-green-600" />
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium" style={{ color: 'rgba(51, 51, 51, 0.7)' }}>Security Status</p>
-              <p className="text-3xl font-bold text-green-600 mt-2">Active</p>
-              <p className="text-sm mt-1" style={{ color: 'rgba(51, 51, 51, 0.6)' }}>All systems operational</p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Shield className="w-6 h-6 text-green-600" />
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Main Content Card */}
