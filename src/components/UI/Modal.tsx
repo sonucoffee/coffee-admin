@@ -50,6 +50,7 @@ const Modal: React.FC<ModalProps> = ({
         </div>
       </div>
     </div>
+  )
   );
 };
 
