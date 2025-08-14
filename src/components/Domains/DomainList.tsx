@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { Plus, Edit2, Trash2, Globe, Calendar, User, Search, ArrowUpDown, Download } from 'lucide-react';
+import { Plus, Edit2, Trash2, Globe, Calendar, User, Search, ArrowUpDown, Download, Shield } from 'lucide-react';
 import { GET_DOMAIN_ALLOWLISTS } from '../../graphql/queries';
 import { DELETE_DOMAIN_ALLOWLIST } from '../../graphql/mutations';
 import { DomainAllowlist } from '../../types/graphql';
@@ -375,61 +375,6 @@ const DomainList: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
-  );
-};
-
-export default DomainList;
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <User className="w-4 h-4 text-gray-400 mr-2" />
-                        <div className="text-sm text-gray-900">
-                          {domain.createdBy ? 
-                            `${domain.createdBy.givenName} ${domain.createdBy.surname}` : 
-                            'Unknown'
-                          }
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-                        <div className="text-sm text-gray-500">
-                          {new Date(domain.createdAt).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end space-x-2">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          icon={Edit2}
-                          onClick={() => setEditingDomain(domain)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          icon={Trash2}
-                          onClick={() => setDeletingDomain(domain)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
 
       {/* Create Domain Modal */}
       <Modal
