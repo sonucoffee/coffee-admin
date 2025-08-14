@@ -303,10 +303,9 @@ const WorkspacePreferences: React.FC = () => {
                             <div className="text-sm text-gray-500">
                               {workspace.domain || 'No domain'}
                             </div>
-                          <div className="flex items-center justify-end">
-                              <div className="flex items-center justify-end">
-                                <ChevronRight className="w-4 h-4 text-gray-400" />
-                          </div>
+                            <div className="flex items-center justify-end">
+                              <ChevronRight className="w-4 h-4 text-gray-400" />
+                            </div>
                           </div>
                         </td>
                       </tr>
