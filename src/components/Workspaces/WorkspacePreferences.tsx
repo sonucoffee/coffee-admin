@@ -258,8 +258,8 @@ const WorkspacePreferences: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="flex-1 overflow-hidden">
-              <div ref={scrollContainerRef} className="h-96 overflow-y-auto">
+            <div className="overflow-hidden">
+              <div ref={scrollContainerRef} className="max-h-96 overflow-y-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
@@ -380,7 +380,9 @@ const WorkspacePreferences: React.FC = () => {
       )}
 
       {preferencesLoading ? (
-        <LoadingSpinner message="Loading preferences..." />
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
       ) : Object.keys(preferences).length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
           <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />

@@ -379,8 +379,8 @@ const UserList: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="flex-1 overflow-hidden">
-              <div ref={scrollContainerRef} className="h-96 overflow-y-auto">
+            <div className="overflow-hidden">
+              <div ref={scrollContainerRef} className="max-h-96 overflow-y-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
