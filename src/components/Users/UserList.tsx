@@ -299,49 +299,6 @@ const UserList: React.FC = () => {
   if (showWorkspaceTable) {
     return (
       <div className="space-y-6 max-w-7xl mx-auto">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Workspaces</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{workspaceState.workspaces.length}</p>
-                <p className="text-sm text-blue-600 mt-1">Available</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Users</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {workspaceState.workspaces.reduce((acc: number, edge: any) => acc + (edge.node.userCount || 0), 0) || '---'}
-                </p>
-                <p className="text-sm text-green-600 mt-1">Across all workspaces</p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Management Status</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">Active</p>
-                <p className="text-sm text-gray-500 mt-1">Ready to manage</p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Shield className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Main Content Card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
