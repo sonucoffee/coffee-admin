@@ -54,7 +54,6 @@ const Sidebar: React.FC = () => {
                 <Users className="w-5 h-5" style={{ color: 'rgba(51, 51, 51, 1)' }} />
               </div>
             )}
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate" style={{ color: 'rgba(51, 51, 51, 1)' }}>
