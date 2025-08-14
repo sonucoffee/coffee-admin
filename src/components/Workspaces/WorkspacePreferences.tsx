@@ -206,7 +206,7 @@ const WorkspacePreferences: React.FC = () => {
     }
 
     const updatedPreferences = {
-      ...prev,
+      ...preferences,
       [key]: parsedValue
     };
 
@@ -239,9 +239,8 @@ const WorkspacePreferences: React.FC = () => {
   const handlePreferenceUpdate = async (key: string, value: string) => {
     const updatedPreferences = { ...preferences };
     delete updatedPreferences[deletingKey];
-      const newPrefs = { ...prev };
+      const newPrefs = { ...preferences };
       delete newPrefs[key];
-      return newPrefs;
 
     setPreferences(updatedPreferences);
     await savePreferences(updatedPreferences);
@@ -360,7 +359,7 @@ const WorkspacePreferences: React.FC = () => {
                   </div>
                 )}
               </div>
-                            </div>
+            </div>
           )}
         </div>
       </div>
@@ -552,6 +551,8 @@ const WorkspacePreferences: React.FC = () => {
             </div>
           ))}
         </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       <Modal
         isOpen={!!deletingKey}
@@ -583,7 +584,7 @@ const WorkspacePreferences: React.FC = () => {
                 </pre>
               </div>
             </div>
-      )}
+
             <div className="flex space-x-3 justify-end pt-4 border-t border-gray-200">
               <Button
                 variant="secondary"
