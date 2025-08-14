@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client';
-import { Building2, Edit2, Mail, Plus, Shield, Trash2, User, Users, ChevronRight } from 'lucide-react';
+import { Building2, Edit2, Mail, Plus, Shield, Trash2, User, Users, ChevronRight, Download, ArrowUpDown } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { DELETE_USER_ROLE } from '../../graphql/mutations';
 import { GET_USERS, GET_WORKSPACES } from '../../graphql/queries';
@@ -7,8 +7,36 @@ import { User as UserType } from '../../types/graphql';
 import Button from '../UI/Button';
 import Modal from '../UI/Modal';
 import Input from '../UI/Input';
+import Select from '../UI/Select';
 import UserForm from './UserForm';
 
+// Helper function to extract name from email
+const extractNameFromEmail = (email: string): string => {
+  const localPart = email.split('@')[0];
+  // Replace common separators with spaces and capitalize
+  return localPart
+    .replace(/[._-]/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
+// Helper function to get display name
+const getDisplayName = (user: UserType): { name: string; isExtracted: boolean } => {
+  const hasName = user.givenName?.trim() && user.surname?.trim();
+  
+  if (hasName) {
+    return {
+      name: `${user.givenName} ${user.surname}`,
+      isExtracted: false
+    };
+  }
+  
+  return {
+    name: extractNameFromEmail(user.email),
+    isExtracted: true
+  };
+};
 const UserList: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserType | null>(null);
@@ -19,6 +47,8 @@ const UserList: React.FC = () => {
   const [showWorkspaceTable, setShowWorkspaceTable] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [userSortField, setUserSortField] = useState<'name' | 'email' | 'role' | 'status'>('name');
+  const [userSortDirection, setUserSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Workspace pagination state
   const [workspaceState, setWorkspaceState] = useState({
@@ -163,6 +193,41 @@ const UserList: React.FC = () => {
     refetch();
   };
 
+  const exportUsersToCSV = () => {
+    const csvData = filteredAndSortedUsers.map(user => ({
+      Name: getDisplayName(user).name,
+      Email: user.email,
+      Role: user.role || 'User',
+      Status: user.isOnboarded ? 'Active' : 'Pending',
+      'Invite Status': user.inviteStatus || 'N/A',
+      'Last Login': user.lastLoginTs ? new Date(user.lastLoginTs).toLocaleDateString() : 'Never'
+    }));
+
+    const csvContent = [
+      Object.keys(csvData[0]).join(','),
+      ...csvData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `workspace-users-${selectedWorkspaceName.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleUserSort = (field: 'name' | 'email' | 'role' | 'status') => {
+    if (userSortField === field) {
+      setUserSortDirection(userSortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setUserSortField(field);
+      setUserSortDirection('asc');
+    }
+  };
+
   const users = data?.users?.edges?.map((edge: any) => edge.node) || [];
 
   // Filter users based on search query
@@ -170,7 +235,7 @@ const UserList: React.FC = () => {
     if (!userSearchQuery.trim()) return true;
     
     const searchTerm = userSearchQuery.toLowerCase();
-    const fullName = `${user.givenName} ${user.surname}`.toLowerCase();
+    const fullName = getDisplayName(user).name.toLowerCase();
     const email = user.email.toLowerCase();
     const role = (user.role || '').toLowerCase();
     
@@ -179,18 +244,56 @@ const UserList: React.FC = () => {
            role.includes(searchTerm);
   });
 
+  // Sort filtered users
+  const filteredAndSortedUsers = [...filteredUsers].sort((a, b) => {
+    let aValue: string | number;
+    let bValue: string | number;
+
+    switch (userSortField) {
+      case 'name':
+        aValue = getDisplayName(a).name.toLowerCase();
+        bValue = getDisplayName(b).name.toLowerCase();
+        break;
+      case 'email':
+        aValue = a.email.toLowerCase();
+        bValue = b.email.toLowerCase();
+        break;
+      case 'role':
+        aValue = (a.role || 'user').toLowerCase();
+        bValue = (b.role || 'user').toLowerCase();
+        break;
+      case 'status':
+        aValue = a.isOnboarded ? 'active' : 'pending';
+        bValue = b.isOnboarded ? 'active' : 'pending';
+        break;
+      default:
+        return 0;
+    }
+
+    if (userSortDirection === 'asc') {
+      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    } else {
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+    }
+  });
+
   const getRoleBadgeColor = (role: string) => {
     switch (role?.toLowerCase()) {
-      case 'admin':
+      case 'owner':
         return 'bg-red-100 text-red-800';
-      case 'manager':
-        return 'bg-blue-100 text-blue-800';
       case 'user':
         return 'bg-green-100 text-green-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const userSortOptions = [
+    { value: 'name', label: 'Name' },
+    { value: 'email', label: 'Email' },
+    { value: 'role', label: 'Role' },
+    { value: 'status', label: 'Status' }
+  ];
 
   // Show workspace selection table
   if (showWorkspaceTable) {
@@ -278,7 +381,9 @@ const UserList: React.FC = () => {
                             <div className="text-sm text-gray-500">
                               {workspace.domain || 'No domain'}
                             </div>
-                            <ChevronRight className="w-5 h-5 text-gray-400 ml-3" />
+                          <div className="flex items-center justify-end">
+                            <ChevronRight className="w-4 h-4 text-gray-400" />
+                          </div>
                           </div>
                         </td>
                       </tr>
@@ -324,6 +429,15 @@ const UserList: React.FC = () => {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{selectedWorkspaceName}</h1>
+            <div className="flex items-center space-x-2 mt-1">
+              <p className="text-gray-600">Manage users in this workspace</p>
+              <div className="flex items-center space-x-2 bg-blue-50 px-3 py-1 rounded-full">
+                <Users className="w-4 h-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-900">
+                  {users.length} {users.length === 1 ? 'User' : 'Users'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
         <Button
@@ -335,14 +449,54 @@ const UserList: React.FC = () => {
       </div>
 
       {/* User Search */}
-      {!loading && !error && users.length > 0 && (
+      {!loading && !error && (
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <Input
-            label="Search Users"
-            value={userSearchQuery}
-            onChange={handleUserSearch}
-            placeholder="Search by name, email, or role..."
-          />
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+            <div className="flex-1">
+              <Input
+                label="Search Users"
+                value={userSearchQuery}
+                onChange={handleUserSearch}
+                placeholder="Search by name, email, or role..."
+              />
+            </div>
+            
+            {users.length > 0 && (
+              <div className="flex items-end space-x-3">
+                <Select
+                  label="Sort By"
+                  value={userSortField}
+                  onChange={(value) => setUserSortField(value as 'name' | 'email' | 'role' | 'status')}
+                  options={userSortOptions}
+                  className="min-w-[120px]"
+                />
+                
+                <Button
+                  variant="secondary"
+                  onClick={() => setUserSortDirection(userSortDirection === 'asc' ? 'desc' : 'asc')}
+                  className="px-3"
+                >
+                  <ArrowUpDown className="w-4 h-4" />
+                  {userSortDirection === 'asc' ? 'A-Z' : 'Z-A'}
+                </Button>
+                
+                <Button
+                  variant="secondary"
+                  onClick={exportUsersToCSV}
+                  icon={Download}
+                  disabled={filteredAndSortedUsers.length === 0}
+                >
+                  Export CSV
+                </Button>
+              </div>
+            )}
+          </div>
+          
+          {userSearchQuery && users.length > 0 && (
+            <div className="mt-3 text-sm text-gray-600">
+              Showing {filteredAndSortedUsers.length} of {users.length} users
+            </div>
+          )}
         </div>
       )}
 
@@ -354,7 +508,7 @@ const UserList: React.FC = () => {
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800">Error loading users: {error.message}</p>
         </div>
-      ) : filteredUsers.length === 0 ? (
+      ) : filteredAndSortedUsers.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
           <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -377,7 +531,7 @@ const UserList: React.FC = () => {
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Users</h3>
             <p className="text-sm text-gray-600 mt-1">
-              {userSearchQuery ? `Search results (${filteredUsers.length} of ${users.length})` : `${users.length} users in workspace`}
+              {userSearchQuery ? `Search results (${filteredAndSortedUsers.length} of ${users.length})` : `${users.length} users in workspace`}
             </p>
           </div>
           
@@ -387,16 +541,40 @@ const UserList: React.FC = () => {
                 <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      User
+                      <button
+                        onClick={() => handleUserSort('name')}
+                        className="flex items-center space-x-1 hover:text-gray-700"
+                      >
+                        <span>User</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </button>
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
+                      <button
+                        onClick={() => handleUserSort('email')}
+                        className="flex items-center space-x-1 hover:text-gray-700"
+                      >
+                        <span>Email</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </button>
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Role
+                      <button
+                        onClick={() => handleUserSort('role')}
+                        className="flex items-center space-x-1 hover:text-gray-700"
+                      >
+                        <span>Role</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </button>
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
+                      <button
+                        onClick={() => handleUserSort('status')}
+                        className="flex items-center space-x-1 hover:text-gray-700"
+                      >
+                        <span>Status</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </button>
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -404,14 +582,16 @@ const UserList: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredUsers.map((user: UserType) => (
+                  {filteredAndSortedUsers.map((user: UserType) => {
+                    const displayName = getDisplayName(user);
+                    return (
                     <tr key={user.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           {user.profileImageUrl ? (
                             <img
                               src={user.profileImageUrl}
-                              alt={`${user.givenName} ${user.surname}`}
+                              alt={displayName.name}
                               className="w-10 h-10 rounded-full mr-3"
                             />
                           ) : (
@@ -420,8 +600,16 @@ const UserList: React.FC = () => {
                             </div>
                           )}
                           <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {user.givenName} {user.surname}
+                            <div className="flex items-center space-x-2">
+                              <div className="text-sm font-medium text-gray-900">
+                                {displayName.name}
+                              </div>
+                              {displayName.isExtracted && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                  <Mail className="w-3 h-3 mr-1" />
+                                  from email
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -466,7 +654,8 @@ const UserList: React.FC = () => {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -522,7 +711,7 @@ const UserList: React.FC = () => {
             <p className="text-gray-600">
               Are you sure you want to remove{' '}
               <span className="font-medium text-gray-900">
-                {deletingUser.givenName} {deletingUser.surname}
+                {getDisplayName(deletingUser).name}
               </span>{' '}
               from the workspace? This action cannot be undone.
             </p>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Shield, Users, Globe, Building2 } from 'lucide-react';
+import { Shield, Users, Globe, Building2, Settings } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
   const navItems = [
@@ -21,6 +21,12 @@ const Sidebar: React.FC = () => {
       icon: Users,
       label: 'User Management',
       description: 'Add, edit, and remove users'
+    },
+    {
+      to: '/workspace-preferences',
+      icon: Settings,
+      label: 'Workspace Preferences',
+      description: 'Manage workspace settings'
     }
   ];
 

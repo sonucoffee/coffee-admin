@@ -11,6 +11,7 @@ import UnauthorizedPage from './components/Auth/UnauthorizedPage';
 import DomainList from './components/Domains/DomainList';
 import UserList from './components/Users/UserList';
 import CreateWorkspace from './components/Workspaces/CreateWorkspace';
+import WorkspacePreferences from './components/Workspaces/WorkspacePreferences';
 import LoadingSpinner from './components/UI/LoadingSpinner';
 
 const AuthorizedApp: React.FC = () => {
@@ -58,6 +59,7 @@ const AuthorizedApp: React.FC = () => {
         <Route path="/create-workspace" element={<CreateWorkspace />} />
         <Route path="/domains" element={<DomainList />} />
         <Route path="/users" element={<UserList />} />
+        <Route path="/workspace-preferences" element={<WorkspacePreferences />} />
         <Route path="*" element={<Navigate to="/domains" replace />} />
       </Routes>
     </Layout>

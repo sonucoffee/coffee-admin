@@ -30,8 +30,7 @@ const UserForm: React.FC<UserFormProps> = ({
   const [updateUser] = useMutation(UPDATE_USER);
 
   const roleOptions = [
-    { value: 'admin', label: 'Admin' },
-    { value: 'manager', label: 'Manager' },
+    { value: 'owner', label: 'Owner' },
     { value: 'user', label: 'User' }
   ];
 
@@ -157,8 +156,7 @@ const UserForm: React.FC<UserFormProps> = ({
       <div className="text-sm text-gray-600">
         <p className="mb-2">Role permissions:</p>
         <ul className="list-disc list-inside space-y-1 text-xs">
-          <li><strong>Admin:</strong> Full access to all features and settings</li>
-          <li><strong>Manager:</strong> Can manage users and view all data</li>
+          <li><strong>Owner:</strong> Full access to all features and workspace management</li>
           <li><strong>User:</strong> Standard access to workspace features</li>
         </ul>
       </div>
