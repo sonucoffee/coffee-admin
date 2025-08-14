@@ -334,7 +334,6 @@ const WorkspacePreferences: React.FC = () => {
                             </div>
           )}
         </div>
-        </div>
       </div>
     );
   }
