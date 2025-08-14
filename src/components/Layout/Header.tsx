@@ -59,20 +59,3 @@ const Header: React.FC = () => {
 };
 
 export default Header;
-            </div>
-            
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-};
-
-export default Header;
