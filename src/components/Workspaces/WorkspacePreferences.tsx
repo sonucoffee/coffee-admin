@@ -229,25 +229,33 @@ const WorkspacePreferences: React.FC = () => {
   // Show workspace selection if no workspace is selected
   if (showWorkspaceTable) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Workspace Preferences</h1>
-            <p className="text-gray-600 mt-1">Select a workspace to manage its preferences</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+      <div className="space-y-6 max-w-7xl mx-auto">
+        {/* Main Content Card */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+          {/* Card Header */}
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Available Workspaces</h3>
-            <p className="text-sm text-gray-600 mt-1">
-              Choose a workspace to configure its preferences and settings
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Workspace Preferences</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Select a workspace to manage its preferences
+                </p>
+              </div>
+            </div>
           </div>
 
-          {workspacesLoading ? (
+          {/* Search */}
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <Input
+              value={workspaceSearchQuery}
+              onChange={handleWorkspaceSearch}
+              placeholder="Type workspace name to search..."
+            />
+          </div>
+
+          {(workspacesLoading && workspaceState.workspaces.length === 0) ? (
             <div className="flex items-center justify-center h-96">
-              <LoadingSpinner message="Loading workspaces..." />
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
             </div>
           ) : workspaceState.workspaces.length === 0 ? (
             <div className="text-center py-12 h-96 flex flex-col items-center justify-center">
@@ -260,51 +268,52 @@ const WorkspacePreferences: React.FC = () => {
           ) : (
             <div className="overflow-hidden">
               <div ref={scrollContainerRef} className="max-h-96 overflow-y-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Workspace Name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Domain
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {workspaceState.workspaces.map((edge: any) => {
-                      const workspace = edge.node;
-                      return (
-                        <tr 
-                          key={workspace.id} 
-                          className="hover:bg-gray-50 cursor-pointer transition-colors"
-                          onClick={() => handleWorkspaceSelect(workspace)}
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <Building2 className="w-5 h-5 text-gray-400 mr-3" />
-                              <div>
-                                <div className="text-sm font-medium text-gray-900">
-                                  {workspace.name}
-                                </div>
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Workspace Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Domain
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {workspaceState.workspaces.map((edge: any) => {
+                    const workspace = edge.node;
+                    return (
+                      <tr 
+                        key={workspace.id} 
+                        className="hover:bg-gray-50 cursor-pointer transition-colors"
+                        onClick={() => handleWorkspaceSelect(workspace)}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <Building2 className="w-5 h-5 text-gray-400 mr-3" />
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {workspace.name}
                               </div>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center justify-between">
-                              <div className="text-sm text-gray-500">
-                                {workspace.domain || 'No domain'}
-                              </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center justify-between">
+                            <div className="text-sm text-gray-500">
+                              {workspace.domain || 'No domain'}
+                            </div>
+                          <div className="flex items-center justify-end">
                               <div className="flex items-center justify-end">
                                 <ChevronRight className="w-4 h-4 text-gray-400" />
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                          </div>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
 
                 {/* Loading indicator at bottom of table */}
                 {isLoadingMore && (
@@ -323,8 +332,9 @@ const WorkspacePreferences: React.FC = () => {
                   </div>
                 )}
               </div>
-            </div>
+                            </div>
           )}
+        </div>
         </div>
       </div>
     );
