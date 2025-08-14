@@ -205,66 +205,65 @@ const WorkspacePreferences: React.FC = () => {
     setPreferences(prev => ({
       ...prev,
       [key]: parsedValue
-    }));
+                      <td className="px-6 py-4 whitespace-nowrap">
     setEditingKey(null);
   };
 
   // Delete preference
   const handleDeletePreference = (key: string) => {
     setPreferences(prev => {
-      const newPrefs = { ...prev };
-      delete newPrefs[key];
-      return newPrefs;
-    });
-  };
-
-  // Format value for display
-  const formatValue = (value: any): string => {
-    if (typeof value === 'object') {
-      return JSON.stringify(value, null, 2);
-    }
-    return String(value);
-  };
-
-  // Show workspace selection table
-  if (showWorkspaceTable) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Workspace Preferences</h1>
-            <p className="text-gray-600 mt-1">
-              Select a workspace to manage its preferences
-            </p>
-          </div>
-        </div>
-
-        {/* Workspace Search */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center space-x-3 mb-4">
-            <Building2 className="w-5 h-5 text-gray-400" />
-            <h2 className="text-lg font-medium text-gray-900">Search Workspace</h2>
-          </div>
-          <Input
-            label="Search for a specific workspace"
-            value={workspaceSearchQuery}
-            onChange={handleWorkspaceSearch}
-            placeholder="Type workspace name to search..."
-          />
-        </div>
-
-        {/* Workspaces Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col">
-          <div className="px-6 py-4 border-b border-gray-200">
+                            <div className="flex items-center space-x-2">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {typeof value}
+                              </span>
+                              <span className="text-gray-500">→</span>
+                              {editingKey === key ? (
+                                <div className="flex items-center space-x-2">
+                                  <textarea
+                                    defaultValue={formatValue(value)}
+                                    className="px-3 py-1 border border-gray-300 rounded text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[300px]"
+                                    rows={1}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Escape') {
+                                        setEditingKey(null);
+                                      }
+                                      if (e.key === 'Enter' && e.ctrlKey) {
+                                        handleUpdatePreference(key, e.currentTarget.value);
+                                      }
+                                    }}
+                                    autoFocus
+                                  />
+                                  <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    onClick={() => setEditingKey(null)}
+                                    className="px-2"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      const textarea = document.querySelector(`textarea[data-key="${key}"]`) as HTMLTextAreaElement;
+                                      if (textarea) {
+                                        handleUpdatePreference(key, textarea.value);
+                                      }
+                                    }}
+                                    className="px-2"
+                                  >
+                                    <Save className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="text-sm text-gray-800 font-mono max-w-md truncate" title={formatValue(value)}>
+                                  {formatValue(value)}
+                                </div>
+                              )}
             <h3 className="text-lg font-medium text-gray-900">Available Workspaces</h3>
             <p className="text-sm text-gray-600 mt-1">
-              {workspaceSearchQuery ? 'Search results' : 'All workspaces'} ({workspaceState.workspaces.length} loaded){workspaceState.hasNextPage ? ' - Scroll down for more' : ''}
-            </p>
-          </div>
-
-          {(workspacesLoading && workspaceState.workspaces.length === 0) ? (
+                        </div>
             <div className="flex items-center justify-center h-96">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
             </div>
           ) : workspaceState.workspaces.length === 0 ? (
             <div className="text-center py-12 h-96 flex flex-col items-center justify-center">
