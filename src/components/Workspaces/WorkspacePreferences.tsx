@@ -14,6 +14,7 @@ const WorkspacePreferences: React.FC = () => {
   const [showWorkspaceTable, setShowWorkspaceTable] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [preferences, setPreferences] = useState<Record<string, any>>({});
+  const [revenueGptPrefs, setRevenueGptPrefs] = useState<Record<string, any>>({});
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [newKey, setNewKey] = useState('');
@@ -149,6 +150,7 @@ const WorkspacePreferences: React.FC = () => {
         variables: {
           input: {
             workspaceId: selectedWorkspaceId,
+            revenueGpt: revenueGptPrefs,
             preferences: JSON.stringify(preferences)
           }
         }
