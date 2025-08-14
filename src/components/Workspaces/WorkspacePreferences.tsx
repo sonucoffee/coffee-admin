@@ -19,6 +19,7 @@ const WorkspacePreferences: React.FC = () => {
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [newKey, setNewKey] = useState('');
   const [newValue, setNewValue] = useState('');
+  const [deletingKey, setDeletingKey] = useState<string | null>(null);
   const [error, setError] = useState('');
 
   // Workspace pagination state
@@ -143,14 +144,14 @@ const WorkspacePreferences: React.FC = () => {
   };
 
   // Save preferences
-  const savePreferences = async () => {
+  const savePreferences = async (updatedPreferences?: Record<string, any>) => {
     try {
       setError('');
       await updatePreferences({
         variables: {
           input: {
             workspaceId: selectedWorkspaceId,
-            preferences: JSON.stringify(preferences)
+            preferences: JSON.stringify(updatedPreferences || preferences)
           }
         }
       });
@@ -161,7 +162,7 @@ const WorkspacePreferences: React.FC = () => {
   };
 
   // Add new preference
-  const handleAddPreference = () => {
+  const handleAddPreference = async () => {
     if (!newKey.trim()) {
       setError('Key is required');
       return;
@@ -181,10 +182,13 @@ const WorkspacePreferences: React.FC = () => {
       parsedValue = newValue;
     }
 
-    setPreferences(prev => ({
-      ...prev,
+    const updatedPreferences = {
+      ...preferences,
       [newKey]: parsedValue
-    }));
+    };
+
+    setPreferences(updatedPreferences);
+    await savePreferences(updatedPreferences);
 
     setNewKey('');
     setNewValue('');
@@ -193,7 +197,7 @@ const WorkspacePreferences: React.FC = () => {
   };
 
   // Update preference
-  const handleUpdatePreference = (key: string, value: string) => {
+  const handleUpdatePreference = async (key: string, value: string) => {
     let parsedValue: any;
     try {
       parsedValue = JSON.parse(value);
@@ -201,20 +205,46 @@ const WorkspacePreferences: React.FC = () => {
       parsedValue = value;
     }
 
-    setPreferences(prev => ({
+    const updatedPreferences = {
       ...prev,
       [key]: parsedValue
-    }));
+    };
+
+    setPreferences(updatedPreferences);
+    await savePreferences(updatedPreferences);
     setEditingKey(null);
   };
 
   // Delete preference
-  const handleDeletePreference = (key: string) => {
-    setPreferences(prev => {
+  const handleDeletePreference = async () => {
+    if (!deletingKey) return;
+
+    const updatedPreferences = { ...preferences };
+    delete updatedPreferences[deletingKey];
+
+    setPreferences(updatedPreferences);
+    await savePreferences(updatedPreferences);
+    setDeletingKey(null);
+  };
+
+  const confirmDeletePreference = (key: string) => {
+    setDeletingKey(key);
+  };
+
+  const cancelDelete = () => {
+    setDeletingKey(null);
+  };
+
+  // Handle preference update with auto-save
+  const handlePreferenceUpdate = async (key: string, value: string) => {
+    const updatedPreferences = { ...preferences };
+    delete updatedPreferences[deletingKey];
       const newPrefs = { ...prev };
       delete newPrefs[key];
       return newPrefs;
-    });
+
+    setPreferences(updatedPreferences);
+    await savePreferences(updatedPreferences);
   };
 
   // Format value for display
@@ -362,22 +392,13 @@ const WorkspacePreferences: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="flex space-x-3">
-          <Button
-            onClick={() => setIsAddModalOpen(true)}
-            icon={Plus}
-            variant="secondary"
-          >
-            Add Preference
-          </Button>
-          <Button
-            onClick={savePreferences}
-            icon={Save}
-            disabled={preferencesLoading}
-          >
-            Save Changes
-          </Button>
-        </div>
+        <Button
+          onClick={() => setIsAddModalOpen(true)}
+          icon={Plus}
+          variant="secondary"
+        >
+          Add Preference
+        </Button>
       </div>
 
       {error && (
@@ -442,7 +463,7 @@ const WorkspacePreferences: React.FC = () => {
                         size="sm"
                         variant="danger"
                         icon={Trash2}
-                        onClick={() => handleDeletePreference(key)}
+                        onClick={() => confirmDeletePreference(key)}
                       >
                         Delete
                       </Button>
@@ -502,7 +523,7 @@ const WorkspacePreferences: React.FC = () => {
                           }}
                           icon={Save}
                         >
-                          Save Changes
+                          Save
                         </Button>
                       </div>
                     </div>
@@ -531,7 +552,57 @@ const WorkspacePreferences: React.FC = () => {
             </div>
           ))}
         </div>
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={!!deletingKey}
+        onClose={cancelDelete}
+        title="Delete Preference"
+        maxWidth="sm"
+      >
+        {deletingKey && (
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <div className="flex items-center justify-center w-10 h-10 bg-red-100 rounded-full flex-shrink-0">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Delete "{deletingKey}"?
+                </h3>
+                <p className="text-gray-600">
+                  Are you sure you want to delete this preference? This action cannot be undone and will be applied immediately.
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <div className="text-sm text-red-800">
+                <strong>Current value:</strong>
+                <pre className="mt-1 text-xs font-mono bg-red-100 p-2 rounded overflow-x-auto">
+                  {formatValue(preferences[deletingKey])}
+                </pre>
+              </div>
+            </div>
       )}
+            <div className="flex space-x-3 justify-end pt-4 border-t border-gray-200">
+              <Button
+                variant="secondary"
+                onClick={cancelDelete}
+                icon={X}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleDeletePreference}
+                icon={Trash2}
+              >
+                Delete Preference
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Add Preference Modal */}
       <Modal
